@@ -84,3 +84,5 @@ template <ty T, ty... U> str _fmt(const T &t, const U &...u) {
     GET_MACRO(__VA_ARGS__, dbg_mul, dbg_mul, dbg_mul, dbg_mul, dbg_mul,        \
               dbg_mul, dbg_mul, dbg_1)                                         \
     (__VA_ARGS__)
+
+#undef ty

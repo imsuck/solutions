@@ -2,7 +2,7 @@
 using namespace std;
 
 #ifndef LOCAL
-#define dbg(...) 42
+#define dbg(...)
 #endif
 
 using i32 = int32_t;
@@ -22,14 +22,27 @@ using str = string;
 #define eb emplace_back
 
 void solve() {
-    
+    i32 n;
+    cin >> n;
+    vec<pair<i32, i32>> v(n);
+    for (auto &p : v) {
+        cin >> p.first >> p.second;
+    }
+    sort(all(v));
+    i64 t = 0;
+    i64 ans = 0;
+    for (auto &p : v) {
+        t += p.first;
+        ans += p.second - t;
+    }
+    cout << ans << "\n";
 }
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     i32 t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
         solve();
 }

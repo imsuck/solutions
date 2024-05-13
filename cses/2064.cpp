@@ -21,15 +21,41 @@ using str = string;
 #define pp pop_back
 #define eb emplace_back
 
+const i32 MOD = 1e9 + 7;
+
+i64 mod_inv(i64 a) {
+    i64 b = MOD, x = 1, y = 0;
+    while (a != 1) {
+        y -= b / a * x;
+        b %= a;
+        swap(a, b);
+        swap(x, y);
+    }
+    return x < 0 ? x + MOD : x;
+}
+
 void solve() {
-    
+    i32 n;
+    cin >> n;
+    if (n & 1) {
+        cout << "0\n";
+        return;
+    }
+    n /= 2;
+    vec<i64> p(2*n + 1);
+    p[1] = 1;
+    for (i32 i = 2; i <= 2*n; i++)
+        p[i] = i * p[i-1] % MOD;
+    i64 ans = mod_inv(n+1) * p[2*n] % MOD;
+    ans = ans * mod_inv(p[n] * p[n] % MOD) % MOD;
+    cout << ans << "\n";
 }
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     i32 t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
         solve();
 }

@@ -22,7 +22,16 @@ using str = string;
 #define eb emplace_back
 
 void solve() {
-    
+    i32 n, m;
+    cin >> n >> m;
+    str s1, s2;
+    cin >> s1 >> s2;
+    i32 k, j = 0;
+    for (k = 0; k < n && j < m; k += (j < m) && (s2[j] == s1[k]), j++) {
+        while (j < m && s2[j] != s1[k])
+            j++;
+    }
+    cout << k << "\n";
 }
 
 int main() {

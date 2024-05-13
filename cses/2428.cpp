@@ -22,14 +22,31 @@ using str = string;
 #define eb emplace_back
 
 void solve() {
-    
+    i32 n, k;
+    cin >> n >> k;
+    vec<i32> v(n);
+    for (i32 &i : v) {
+        cin >> i;
+    }
+    map<i32, i32> m;
+    i64 ans = 0;
+    for (i32 l = 0, r = 0; r < n; r++) {
+        m[v[r]]++;
+        while (m.len() > k) {
+            m[v[l]]--;
+            if (m[v[l]] == 0) m.erase(v[l]);
+            l++;
+        }
+        ans += r - l + 1;
+    }
+    cout << ans << "\n";
 }
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     i32 t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
         solve();
 }

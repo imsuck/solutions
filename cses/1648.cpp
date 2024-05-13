@@ -3,55 +3,46 @@ using namespace std;
 
 using i32 = int32_t;
 using i64 = int64_t;
+template<typename T> using vec = vector<T>;
 
-struct FenwickTree {
-    vector<i64> bit;
+struct SegTree {
     i32 n;
-
-    FenwickTree(i32 n) {
-        this->n = n;
-        bit.assign(n, 0);
+    vec<i64> t;
+    SegTree(i32 n) : n(n), t(2*n) {};
+    SegTree(vec<i64> const &v) : SegTree(v.size()) {
+        for (i32 i = 0; i < v.size(); i++)
+            t[i + n] = v[i];
+        for (i32 i = n - 1; i > 0; i--)
+            t[i] = t[i<<1] + t[i<<1|1];
+    };
+    void update(i32 v, i32 val) {
+        for (t[v += n] = val; v > 1; v >>= 1)
+            t[v>>1] = t[v] + t[v^1];
     }
-
-    FenwickTree(vector<i32> const &a) : FenwickTree(a.size()) {
-        for (size_t i = 0; i < a.size(); i++)
-            add(i, a[i]);
-    }
-
-    i64 sum(i32 r) {
-        i64 s = 0;
-        for (; r >= 0; r = (r & (r + 1)) - 1)
-            s += bit[r];
-        return s;
-    }
-
-    i64 sum(i32 l, i32 r) { return sum(r) - sum(l - 1); }
-
-    void add(i32 idx, i32 delta) {
-        for (; idx < n; idx = idx | (idx + 1))
-            bit[idx] += delta;
+    i64 query(i32 l, i32 r) {
+        i64 res = 0;
+        for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+            if (l&1) res += t[l++];
+            if (r&1) res += t[--r];
+        }
+        return res;
     }
 };
 
-int main() {
+i32 main() {
+    cin.tie(0)->sync_with_stdio(0);
     i32 n, q;
     cin >> n >> q;
-
-    FenwickTree bit(n);
-    for (i32 i = 0; i < n; i++) {
-        i32 a;
-        cin >> a;
-        bit.add(i, a);
-    }
-
+    vec<i64> v(n);
+    for (i64 &i : v) cin >> i;
+    SegTree st(v);
     while (q--) {
-        i32 t, a, b;
-        cin >> t >> a >> b, a--;
-        if (t == 1) {
-            i32 diff = b - bit.sum(a, a);
-            bit.add(a, diff);
-        } else {
-            cout << bit.sum(a, b - 1) << "\n";
-        }
+        i32 ty, a, b;
+        cin >> ty >> a >> b;
+        a--;
+        if (ty == 1)
+            st.update(a, b);
+        else
+            cout << st.query(a, b) << "\n";
     }
 }

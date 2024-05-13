@@ -22,14 +22,21 @@ using str = string;
 #define eb emplace_back
 
 void solve() {
-    
+    i32 n;
+    cin >> n;
+    vec<i64> v(n);
+    for (i64 &i : v)
+        cin >> i;
+    sort(all(v));
+    i64 sum = accumulate(all(v), i64(0));
+    cout << max(sum, 2 * v.back()) << "\n";
 }
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     i32 t = 1;
-    cin >> t;
+    // cin >> t;
     while (t--)
         solve();
 }
