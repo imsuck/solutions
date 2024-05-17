@@ -8,10 +8,11 @@ using i32 = int32_t;
 using u32 = uint32_t;
 using i64 = int64_t;
 using u64 = uint64_t;
-using i128 = __int128_t;
-using u128 = __uint128_t;
 using str = string;
 
+#ifdef __SIZEOF_INT128__
+using i128 = __int128_t;
+using u128 = __uint128_t;
 str to_str(i128 x) {
     str s = "";
     if (x < 0)
@@ -28,6 +29,7 @@ str to_str(u128 x) {
     s.push_back(char(x % 10) + '0');
     return s;
 }
+#endif
 str to_str(bool b) { return b ? "true" : "false"; }
 str to_str(char c) { return "'" + str(1, c) + "'"; }
 str to_str(const str &s) { return '"' + s + '"'; }
@@ -49,6 +51,14 @@ template <ty T> str to_str(const vector<T> &x) {
     str s = "[";
     for (const auto &i : x)
         s += (f++ ? ", " : "") + to_str(i);
+    s += "]";
+    return s;
+}
+template <ty T> str to_str(T x[]) {
+    i32 f = 0;
+    str s = "[";
+    for (auto it = begin(x); it != end(x); it++)
+        s += (f++ ? ", " : "") + to_str(*it);
     s += "]";
     return s;
 }
@@ -86,3 +96,4 @@ template <ty T, ty... U> str _fmt(const T &t, const U &...u) {
     (__VA_ARGS__)
 
 #undef ty
+#undef to_strt
