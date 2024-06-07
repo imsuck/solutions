@@ -1,24 +1,34 @@
-#include <bits/stdc++.h>
+#include <cassert>
+#include <vector>
 using namespace std;
 
-template <typename T> struct SegTree {
-    using usize = uintmax_t;
-
+// Modified version of atcoder library's segtree.hpp
+template <class S> struct SegTree {
   public:
     SegTree() : SegTree(0) {}
-    SegTree(usize n) : n(n), t(2 * n) {}
-    SegTree(const vector<T> &v) : SegTree(v.size()) {
-        for (usize i = 0; i < n; i++)
+    SegTree(int _n) : n(_n), t(2 * _n, S::e()) {}
+    SegTree(const vector<S> &v) : SegTree(v.size()) {
+        for (int i = 0; i < n; i++)
             t[i + n] = v[i];
-        for (usize i = n - 1; i > 0; i--)
+        for (int i = n - 1; i > 0; i--)
             update(i);
     }
-    void set(usize p, T val) {
+    void set(int p, S val) {
+        assert(0 <= p && p < n);
         for (t[p += n] = val; p >>= 1;)
             update(p);
     }
-    T query(usize l, usize r) {
-        T resl = T::id(), resr = T::id();
+    S get(int p) const {
+        assert(0 <= p && p < n);
+        return t[p + n];
+    }
+    S all_prod() const { return t[1]; }
+    S prod(int l, int r) const {
+        assert(0 <= l && l <= r && r <= n);
+        if (l == 0 && r == n - 1)
+            return all_prod();
+
+        S resl = S::e(), resr = S::e();
         for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
             if (l & 1)
                 resl = resl + t[l++];
@@ -30,7 +40,7 @@ template <typename T> struct SegTree {
     }
 
   private:
-    usize n;
-    vector<T> t;
-    void update(usize p) { t[p] = t[p << 1] + t[p << 1 | 1]; }
+    int n;
+    vector<S> t;
+    void update(int p) { t[p] = t[p << 1] + t[p << 1 | 1]; }
 };
