@@ -1,3 +1,4 @@
+// TODO: Fix this unfinished mess
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -54,7 +55,7 @@ u64 power(u64 a, u64 n, u64 m) {
 
 constexpr bool miller_rabin(u64 n) {
     if (n <= 1) return false;
-    for (u32 prime : { 2, 3, 5, 7, 11 }) {
+    for (u32 prime : {2, 3, 5, 7, 11}) {
         if (n == prime) return true;
         if (n % prime == 0) return false;
     }
@@ -62,8 +63,7 @@ constexpr bool miller_rabin(u64 n) {
 
     const u32 s = __builtin_ctzll(n - 1);
     const u64 d = (n - 1) >> s;
-    for (u64 base :
-         { 2U, 325U, 9375U, 28178U, 450775U, 9780504U, 1795265022U }) {
+    for (u64 base : {2U, 325U, 9375U, 28178U, 450775U, 9780504U, 1795265022U}) {
         u64 a = base % n;
         if (a == 0) continue;
         u64 x = power(a, d, n);
@@ -95,6 +95,7 @@ u64 find_factor(u64 n, u64 seed, u64 c) {
 
 vec<u64> factors(u64 n) {
     vec<u64> res;
+    if (n == 1) return res;
     do {
         u64 d = 1;
         while (!miller_rabin(d)) {
@@ -109,12 +110,18 @@ vec<u64> factors(u64 n) {
 }
 
 int main() {
-    u64 n;
-    cin >> n;
-    vec<u64> fac = factors(n);
-    sort(fac.begin(), fac.end());
-    for (u64 i : fac) {
-        cout << i << " ";
+    cin.tie(0)->sync_with_stdio(0);
+    u32 tt;
+    cin >> tt;
+    while (tt--) {
+        u64 n;
+        cin >> n;
+        vec<u64> fac = factors(n);
+        sort(fac.begin(), fac.end());
+        cout << fac.size() << " ";
+        for (u64 i : fac) {
+            cout << i << " ";
+        }
+        cout << "\n";
     }
-    cout << "\n";
 }
