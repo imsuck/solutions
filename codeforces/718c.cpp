@@ -17,13 +17,11 @@ template <class S, class F> struct LazySegTree {
     LazySegTree(int _n) : LazySegTree(vec<S>(_n, S::e())) {}
     LazySegTree(const vec<S> &v) : n((int)v.size()) {
         m = 1, lg = 0;
-        while (m < n)
-            m *= 2, lg++;
+        while (m < n) m *= 2, lg++;
         t = vec<S>(2 * m, S::e());
         lz = vec<F>(m, F::id());
         copy(v.begin(), v.end(), t.begin() + m);
-        for (int i = m - 1; i >= 1; i--)
-            update(i);
+        for (int i = m - 1; i >= 1; i--) update(i);
     }
 
     void set(int p, const S &x) {
@@ -43,20 +41,15 @@ template <class S, class F> struct LazySegTree {
 
     S prod(int l, int r) {
         assert(0 <= l && l <= r && r <= n);
-        if (l == r)
-            return S::e();
-        if (l == r + 1)
-            return get(l);
-        if (l == 0 && r == n)
-            return all_prod();
+        if (l == r) return S::e();
+        if (l == r + 1) return get(l);
+        if (l == 0 && r == n) return all_prod();
 
         push_to(l, r);
         S resl = S::e(), resr = S::e();
         for (l += m, r += m; l < r; l >>= 1, r >>= 1) {
-            if (l & 1)
-                resl = resl + t[l++];
-            if (r & 1)
-                resr = t[--r] + resr;
+            if (l & 1) resl = resl + t[l++];
+            if (r & 1) resr = t[--r] + resr;
         }
         return resl + resr;
     }
@@ -70,15 +63,12 @@ template <class S, class F> struct LazySegTree {
 
     void apply(int l, int r, const F &f) {
         assert(0 <= l && l <= r && r <= n);
-        if (l == r)
-            return;
+        if (l == r) return;
 
         push_to(l, r);
         for (int l2 = l + m, r2 = r + m; l2 < r2; l2 >>= 1, r2 >>= 1) {
-            if (l2 & 1)
-                all_apply(l2++, f);
-            if (r2 & 1)
-                all_apply(--r2, f);
+            if (l2 & 1) all_apply(l2++, f);
+            if (r2 & 1) all_apply(--r2, f);
         }
         update_from(l, r);
     }
@@ -90,21 +80,17 @@ template <class S, class F> struct LazySegTree {
     void update(int p) { t[p] = t[p << 1] + t[p << 1 | 1]; }
     void update_from(int p) {
         p += m;
-        for (int i = 1; i <= lg; i++)
-            update(p >> i);
+        for (int i = 1; i <= lg; i++) update(p >> i);
     }
     void update_from(int l, int r) {
         l += m, r += m;
         int li = __builtin_ctz(l), ri = __builtin_ctz(r);
-        for (int i = li + 1; i <= lg; i++)
-            update(l >> i);
-        for (int i = ri + 1; i <= lg; i++)
-            update(r >> i);
+        for (int i = li + 1; i <= lg; i++) update(l >> i);
+        for (int i = ri + 1; i <= lg; i++) update(r >> i);
     }
     void all_apply(int p, const F &f) {
         t[p] = f(t[p]);
-        if (p < m)
-            lz[p] = f * lz[p];
+        if (p < m) lz[p] = f * lz[p];
     }
     void push(int p) {
         all_apply(p << 1, lz[p]), all_apply(p << 1 | 1, lz[p]);
@@ -112,20 +98,22 @@ template <class S, class F> struct LazySegTree {
     }
     void push_to(int p) {
         p += m;
-        for (int i = lg; i >= 1; i--)
-            push(p >> i);
+        for (int i = lg; i >= 1; i--) push(p >> i);
     }
     void push_to(int l, int r) {
         l += m, r += m;
         int li = __builtin_ctz(l), ri = __builtin_ctz(r);
-        for (int i = lg; i >= li + 1; i--)
-            push(l >> i);
-        for (int i = lg; i >= ri + 1; i--)
-            push(r >> i);
+        for (int i = lg; i >= li + 1; i--) push(l >> i);
+        for (int i = lg; i >= ri + 1; i--) push(r >> i);
     }
 };
 
-template <class T, int N, int mod> struct Matrix {
+template<class T, int N, int mod> struct Matrix {
+  private:
+    template<class _> using vec = vector<_>;
+    static constexpr T mul(T a, T b) { return mod ? a * b % mod : a * b; }
+
+  public:
     T mat[N][N];
     T *operator[](int i) {
         assert(0 <= i && i < N);
@@ -134,13 +122,11 @@ template <class T, int N, int mod> struct Matrix {
     constexpr Matrix() : mat{} {}
     Matrix(const vec<vec<T>> &v) {
         for (int i = 0; i < N; i++)
-            for (int j = 0; j < N; j++)
-                mat[i][j] = v[i][j];
+            for (int j = 0; j < N; j++) mat[i][j] = v[i][j];
     }
     static constexpr Matrix id() {
         Matrix res;
-        for (int i = 0; i < N; i++)
-            res[i][i] = 1;
+        for (int i = 0; i < N; i++) res[i][i] = 1;
         return res;
     }
 
@@ -149,19 +135,17 @@ template <class T, int N, int mod> struct Matrix {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 for (int k = 0; k < N; k++) {
-                    res[i][j] += l.mat[i][k] * r.mat[k][j];
-                    if (mod)
-                        res[i][j] %= mod;
+                    res[i][j] += mul(l.mat[i][k], r.mat[k][j]);
+                    if (res[i][j] >= mod) res[i][j] -= mod;
                 }
             }
         }
         return res;
     }
-    Matrix operator^(i64 n) const {
+    Matrix operator^(int64_t n) const {
         Matrix res = id(), base = *this;
         while (n) {
-            if (n & 1)
-                res = res * base;
+            if (n & 1) res = res * base;
             base = base * base;
             n >>= 1;
         }
@@ -172,9 +156,8 @@ template <class T, int N, int mod> struct Matrix {
         vec<T> res(x.size());
         for (int i = 0; i < N; i++) {
             for (int k = 0; k < N; k++) {
-                res[i] += mat[i][k] * x[k];
-                if (mod)
-                    res[i] %= mod;
+                res[i] += mul(mat[i][k], x[k]);
+                if (res[i] >= mod) res[i] -= mod;
             }
         }
         return res;
