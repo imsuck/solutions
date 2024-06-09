@@ -15,8 +15,8 @@ using f128 = long double;
 using str = string;
 #define len() size()
 #define vec vector
-#define all(a) (a).begin(), (a).end()
-#define rall(a) (a).rbegin(), (a).rend()
+#define all(a) begin(a), end(a)
+#define rall(a) rbegin(a), rend(a)
 #define pb push_back
 #define pp pop_back
 #define eb emplace_back
@@ -30,6 +30,5 @@ int main() {
     cin.tie(nullptr);
     i32 t = 1;
     cin >> t;
-    while (t--)
-        solve();
+    while (t--) solve();
 }
