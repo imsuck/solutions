@@ -1,9 +1,6 @@
-#include <cassert>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-// - S: S::e(), S::operator+
-// - F: F::id(), F::operator*, const F(S)->S
 template<class S, class F> struct LazySegTree {
   public:
     LazySegTree() : LazySegTree(0) {}
@@ -94,3 +91,47 @@ template<class S, class F> struct LazySegTree {
         for (int i = lg; i >= ri + 1; i--) push(r >> i);
     }
 };
+
+struct S {
+    int64_t sum;
+    int size;
+    static S e() { return S{0, 0}; }
+    friend S operator+(const S &l, const S &r) {
+        return {l.sum + r.sum, l.size + r.size};
+    }
+};
+
+struct F {
+    int64_t set, inc;
+    static F id() { return F{0, 0}; }
+    friend F operator*(const F &l, const F &r) {
+        return l.set ? l : F{r.set, l.inc + r.inc};
+    }
+    S operator()(const S &x) const {
+        return S{set ? (set + inc) * x.size : x.sum + inc * x.size, x.size};
+    }
+};
+
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
+    int n, q;
+    cin >> n >> q;
+    vector<S> v(n);
+    for (S &s : v) {
+        cin >> s.sum;
+        s.size = 1;
+    }
+    LazySegTree<S, F> st(v);
+    while (q--) {
+        char ty;
+        int a, b, x;
+        cin >> ty >> a >> b;
+        a--;
+        if (ty == '1')
+            cin >> x, st.apply(a, b, F{0, x});
+        else if (ty == '2')
+            cin >> x, st.apply(a, b, F{x, 0});
+        else
+            cout << st.prod(a, b).sum << "\n";
+    }
+}

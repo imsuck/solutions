@@ -15,11 +15,11 @@ template<class T, int N, int mod> struct Matrix {
   public:
     T mat[N][N];
     T *operator[](int i) {
-        assert(0 <= i && i < N);
+        // assert(0 <= i && i < N);
         return mat[i];
     }
     constexpr Matrix() : mat{} {}
-    Matrix(const vec<vec<T>> &v) {
+    constexpr Matrix(const vec<vec<T>> &v) {
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++) mat[i][j] = v[i][j];
     }
@@ -42,6 +42,7 @@ template<class T, int N, int mod> struct Matrix {
         return res;
     }
     Matrix operator^(int64_t n) const {
+        // assert(n >= 0);
         Matrix res = id(), base = *this;
         while (n) {
             if (n & 1) res = res * base;
@@ -51,7 +52,7 @@ template<class T, int N, int mod> struct Matrix {
         return res;
     }
     vec<T> operator*(const vec<T> &x) const {
-        assert(x.size() == N);
+        // assert(x.size() == N);
         vec<T> res(x.size());
         for (int i = 0; i < N; i++) {
             for (int k = 0; k < N; k++) {
