@@ -1,9 +1,10 @@
-#include <cassert>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
-// - S: S::e(), S::operator+
-// - F: F::id(), F::operator*, const F(S)->S
+#ifndef LOCAL
+#define dbg(...) 42
+#endif
+
 template<class S, class F> struct LazySegTree {
   public:
     LazySegTree() : LazySegTree(0) {}
@@ -91,3 +92,55 @@ template<class S, class F> struct LazySegTree {
         for (int i = lg; i >= ri + 1; i--) push(r >> i);
     }
 };
+
+using i32 = int32_t;
+using i64 = int64_t;
+
+const i64 INF = 1e18;
+
+struct S {
+    i64 mn;
+    static constexpr S e() { return S{INF}; }
+    friend S operator+(const S &l, const S &r) { return S{min(l.mn, r.mn)}; }
+};
+
+struct F {
+    i64 inc;
+    static constexpr F id() { return F{0}; }
+    friend F operator*(const F &l, const F &r) { return F{l.inc + r.inc}; }
+    S operator()(const S &x) const { return S{x.mn + inc}; }
+};
+
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
+    i32 n;
+    cin >> n;
+    vector<S> v(n);
+    for (S &s : v) cin >> s.mn;
+    LazySegTree<S, F> st(v);
+    i32 q;
+    cin >> q;
+    cin.ignore();
+    while (q--) {
+        string line;
+        getline(cin, line);
+        stringstream ss(line);
+        i32 l, r;
+        i64 x = INF;
+        ss >> l >> r >> x;
+        if (x == INF) {
+            if (r < l) {
+                cout << (st.prod(l, n) + st.prod(0, r + 1)).mn << "\n";
+                continue;
+            }
+            cout << st.prod(l, r + 1).mn << "\n";
+        } else {
+            if (r < l) {
+                st.apply(l, n, F{x});
+                st.apply(0, r + 1, F{x});
+                continue;
+            }
+            st.apply(l, r + 1, F{x});
+        }
+    }
+}

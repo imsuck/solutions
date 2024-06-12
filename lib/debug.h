@@ -85,7 +85,7 @@ template <ty T, ty... U> str _fmt(const T &t, const U &...u) {
 
 #define dbg_1(a)                                                               \
     cerr << "[\e[33mDEBUG\e[0m:" << __LINE__ << "] " << #a << " = "            \
-         << to_str(a) << "\n"
+         << to_string(a) << "\n"
 #define dbg_mul(a...)                                                          \
     cerr << "[\e[33mDEBUG\e[0m:" << __LINE__ << "] "                           \
          << "[" << #a << "] = [" << _fmt(a) << "]\n"
@@ -96,4 +96,4 @@ template <ty T, ty... U> str _fmt(const T &t, const U &...u) {
     (__VA_ARGS__)
 
 #undef ty
-#undef to_strt
+#undef to_str
