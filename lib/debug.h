@@ -15,17 +15,14 @@ using i128 = __int128_t;
 using u128 = __uint128_t;
 str to_str(i128 x) {
     str s = "";
-    if (x < 0)
-        s += "-", x = -x;
-    if (x > 9)
-        s += to_str(x / 10);
+    if (x < 0) s += "-", x = -x;
+    if (x > 9) s += to_str(x / 10);
     s.push_back(char(x % 10) + '0');
     return s;
 }
 str to_str(u128 x) {
     str s = "";
-    if (x > 9)
-        s += to_str(x / 10);
+    if (x > 9) s += to_str(x / 10);
     s.push_back(char(x % 10) + '0');
     return s;
 }
@@ -34,27 +31,31 @@ str to_str(bool b) { return b ? "true" : "false"; }
 str to_str(char c) { return "'" + str(1, c) + "'"; }
 str to_str(const str &s) { return '"' + s + '"'; }
 
-template <ty T, ty U> str to_str(const pair<T, U> &p) {
+template<ty T> str to_str(const vector<T> &x);
+template<ty T> str to_str(T x[]);
+template<ty T> str to_str(const T &x);
+template<size_t N> str to_str(const bitset<N> &b);
+
+template<ty T, ty U> str to_str(const pair<T, U> &p) {
     return "(" + to_str(p.first) + ", " + to_str(p.second) + ")";
 }
-template <ty T, ty U, ty V> str to_str(const tuple<T, U, V> &t) {
+template<ty T, ty U, ty V> str to_str(const tuple<T, U, V> &t) {
     return "(" + to_str(get<0>(t)) + ", " + to_str(get<1>(t)) + ", " +
            to_str(get<2>(t)) + ")";
 }
-template <ty T, ty U, ty V, ty W> str to_str(const tuple<T, U, V, W> &t) {
+template<ty T, ty U, ty V, ty W> str to_str(const tuple<T, U, V, W> &t) {
     return "(" + to_str(get<0>(t)) + ", " + to_str(get<1>(t)) + ", " +
            to_str(get<2>(t)) + ", " + to_str(get<3>(t)) + ")";
 }
 
-template <ty T> str to_str(const vector<T> &x) {
+template<ty T> str to_str(const vector<T> &x) {
     i32 f = 0;
     str s = "[";
-    for (const auto &i : x)
-        s += (f++ ? ", " : "") + to_str(i);
+    for (const auto &i : x) s += (f++ ? ", " : "") + to_str(i);
     s += "]";
     return s;
 }
-template <ty T> str to_str(T x[]) {
+template<ty T> str to_str(T x[]) {
     i32 f = 0;
     str s = "[";
     for (auto it = begin(x); it != end(x); it++)
@@ -62,24 +63,22 @@ template <ty T> str to_str(T x[]) {
     s += "]";
     return s;
 }
-template <ty T> str to_str(const T &x) {
+template<ty T> str to_str(const T &x) {
     i32 f = 0;
     str s = "{";
-    for (const auto &i : x)
-        s += (f++ ? ", " : "") + to_str(i);
+    for (const auto &i : x) s += (f++ ? ", " : "") + to_str(i);
     s += "}";
     return s;
 }
-template <size_t N> str to_str(const bitset<N> &b) {
+template<size_t N> str to_str(const bitset<N> &b) {
     str s = "";
-    for (size_t i = N - 1; i > 0; i--)
-        s += b[i] + '0';
+    for (size_t i = N - 1; i > 0; i--) s += b[i] + '0';
     s += b[0] + '0';
     return s;
 }
 
 str _fmt() { return ""; }
-template <ty T, ty... U> str _fmt(const T &t, const U &...u) {
+template<ty T, ty... U> str _fmt(const T &t, const U &...u) {
     return to_str(t) + (sizeof...(u) ? ", " : "") + _fmt(u...);
 }
 
