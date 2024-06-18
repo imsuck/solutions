@@ -16,20 +16,20 @@ template<class S, class F> struct LazySegTree {
     }
 
     void set(int p, const S &x) {
-        // assert(0 <= p && p < n);
+        assert(0 <= p && p < n);
         push_to(p);
         t[p + n] = x;
         update_from(p);
     }
     S get(int p) {
-        // assert(0 <= p && p < n);
+        assert(0 <= p && p < n);
         push_to(p);
         return t[p + n];
     }
 
     S all_prod() { return prod(0, n); }
     S prod(int l, int r) {
-        // assert(0 <= l && l <= r && r <= n);
+        assert(0 <= l && l <= r && r <= n);
         if (l == r) return S::e();
         push_to(l, r);
         S sml = S::e(), smr = S::e();
@@ -41,13 +41,13 @@ template<class S, class F> struct LazySegTree {
     }
 
     void apply(int p, const F &f) {
-        // assert(0 <= p && p < n);
+        assert(0 <= p && p < n);
         push_to(p);
         t[p + n] = f(t[p + n]);
         update_from(p);
     }
     void apply(int l, int r, const F &f) {
-        // assert(0 <= l && l <= r && r <= n);
+        assert(0 <= l && l <= r && r <= n);
         if (l == r) return;
         push_to(l, r);
         for (int l2 = l + n, r2 = r + n; l2 < r2; l2 >>= 1, r2 >>= 1) {

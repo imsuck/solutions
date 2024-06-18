@@ -59,7 +59,6 @@ template<uint32_t m> struct modint {
     }
 
     constexpr mint pow(int64_t n) const {
-        // assert(n >= 0);
         mint b = *this, res(1);
         while (n) n & 1 ? res *= b : 0, b *= b, n >>= 1;
         return res;

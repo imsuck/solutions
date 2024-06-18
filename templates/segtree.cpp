@@ -12,16 +12,16 @@ template<class S> struct SegTree {
         for (int i = n - 1; i > 0; i--) update(i);
     }
     void set(int p, S val) {
-        // assert(0 <= p && p < n);
+        assert(0 <= p && p < n);
         for (t[p += n] = val; p >>= 1;) update(p);
     }
     S get(int p) const {
-        // assert(0 <= p && p < n);
+        assert(0 <= p && p < n);
         return t[p + n];
     }
     S all_prod() const { return prod(0, n); }
     S prod(int l, int r) const {
-        // assert(0 <= l && l <= r && r <= n);
+        assert(0 <= l && l <= r && r <= n);
 
         S resl = S::e(), resr = S::e();
         for (l += n, r += n; l < r; l >>= 1, r >>= 1) {

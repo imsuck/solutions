@@ -1,3 +1,4 @@
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <vector>
@@ -7,17 +8,15 @@ using i32 = int32_t;
 using i64 = int64_t;
 
 // TODO: Make this work for n*m matrices
-template<class T, int N, int mod> struct Matrix {
+template<class T, int N, int mod = 0> struct Matrix {
   private:
     template<class _> using vec = vector<_>;
     static constexpr T mul(T a, T b) { return mod ? a * b % mod : a * b; }
 
   public:
-    T mat[N][N];
-    T *operator[](int i) {
-        // assert(0 <= i && i < N);
-        return mat[i];
-    }
+    array<array<T, N>, N> mat;
+    array<T, N> &operator[](int i) { return mat[i]; }
+    const array<T, N> &operator[](int i) const { return mat[i]; }
     constexpr Matrix() : mat{} {}
     constexpr Matrix(const vec<vec<T>> &v) {
         for (int i = 0; i < N; i++)
@@ -42,7 +41,6 @@ template<class T, int N, int mod> struct Matrix {
         return res;
     }
     Matrix operator^(int64_t n) const {
-        // assert(n >= 0);
         Matrix res = id(), base = *this;
         while (n) {
             if (n & 1) res = res * base;
@@ -52,7 +50,7 @@ template<class T, int N, int mod> struct Matrix {
         return res;
     }
     vec<T> operator*(const vec<T> &x) const {
-        // assert(x.size() == N);
+        assert(x.size() == N);
         vec<T> res(x.size());
         for (int i = 0; i < N; i++) {
             for (int k = 0; k < N; k++) {
@@ -67,7 +65,7 @@ template<class T, int N, int mod> struct Matrix {
 // ----------------------------------------------------------------------------
 #include <iostream>
 
-const i32 MOD = 1e9 + 7;
+const i32 MOD = (i32)1e9 + 7;
 
 void solve() {
     i64 n;

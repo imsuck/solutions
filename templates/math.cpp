@@ -20,6 +20,17 @@ namespace utils {
         return h + hi(m1) + hi(m2) + c;
 #endif
     }
+    u64 mulmod(u64 a, u64 b, u64 m) {
+#ifdef __SIZEOF_INT128__
+        return u64((__uint128_t)a * b % m);
+#else
+        u64 res = mulhi(a, b) % m;
+        for (u32 i = 0; i < 64; i++) (res <<= 1) -= (res >= m) * m;
+        res += a * b % m;
+        return res - (res >= m) * m;
+#endif
+    }
 } // namespace utils
 
 using utils::mulhi;
+using utils::mulmod;
