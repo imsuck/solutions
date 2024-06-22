@@ -8,6 +8,7 @@ using i32 = int32_t;
 using i64 = int64_t;
 
 // TODO: Make this work for n*m matrices
+// clang-format off
 template<class T, int N, int mod = 0> struct Matrix {
   private:
     template<class _> using vec = vector<_>;
@@ -61,6 +62,7 @@ template<class T, int N, int mod = 0> struct Matrix {
         return res;
     }
 };
+// clang-format on
 
 // ----------------------------------------------------------------------------
 #include <iostream>

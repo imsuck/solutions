@@ -4,6 +4,7 @@ using namespace std;
 
 // - S: S::e(), S::operator+
 // - F: F::id(), F::operator*, const F(S)->S
+// clang-format off
 template<class S, class F> struct LazySegTree {
   public:
     LazySegTree() : LazySegTree(0) {}
@@ -91,3 +92,4 @@ template<class S, class F> struct LazySegTree {
         for (int i = lg; i >= ri + 1; i--) push(r >> i);
     }
 };
+// clang-format on

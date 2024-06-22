@@ -4,6 +4,7 @@
 #include <utility>
 using namespace std;
 
+// clang-format off
 template<uint32_t m> struct modint {
     static_assert(int(m) >= 1, "Modulus must be in the range [1;2^31)");
 
@@ -86,3 +87,4 @@ template<uint32_t m> struct modint {
   private:
     uint32_t _v;
 };
+// clang-format on
