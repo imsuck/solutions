@@ -5,7 +5,7 @@ using namespace std;
 template<class T, class Op> struct RangeQuery {
   public:
     RangeQuery(const vector<T> &v, Op _op, T e)
-        : n((int)v.size()), lg(__lg(n - 1) + 1), d(v), mask(n),
+        : n(v.size()), lg(__lg(n - 1) + 1), d(v), mask(n),
           dat(lg, vector<T>(n, e)), op(_op) {
         build(0, n - 1, 0);
     }

@@ -15,16 +15,15 @@ struct BitVec {
     template<class Gen> BitVec(int n, Gen gen) : v(n / wordsize + 1) {
         for (int i = 0; i < n; i++)
             v[i / wordsize].bit |= size_t(gen(i)) << i % wordsize;
-        for (int i = 1; i < (int)v.size(); i++)
+        for (int i = 1; i < v.size(); i++)
             v[i].sum = v[i - 1].sum + popcnt64(v[i - 1].bit);
     }
     bool operator[](int i) const {
         return v[i / wordsize].bit >> i % wordsize & 1;
     }
     int rank(bool val, int i) const {
-        int x =
-            int(v[i / wordsize].sum +
-                popcnt64(v[i / wordsize].bit & ~(~size_t(0) << i % wordsize)));
+        int x = v[i / wordsize].sum +
+                popcnt64(v[i / wordsize].bit & ~(~size_t(0) << i % wordsize));
         return val ? x : i - x;
     }
     int rank(bool val, int l, int r) const {
@@ -43,8 +42,8 @@ struct BitVec {
 #endif
         x -= x >> 1 & 0x5555555555555555;
         x = (x & 0x3333333333333333) + (x >> 2 & 0x3333333333333333);
-        x = (x + (x >> 4)) & 0xf0f0f0f0f0f0f0f0;
-        return int(x * 0x01010101010101010 >> 56);
+        x = (x + (x >> 4)) & 0x0f0f0f0f0f0f0f0f;
+        return x * 0x0101010101010101 >> 56;
     }
 };
 
@@ -54,7 +53,7 @@ struct WaveletMatrix {
   public:
     WaveletMatrix() = default;
     explicit WaveletMatrix(const vector<T> &a)
-        : WaveletMatrix((int)a.size(), [&](int i) { return a[i]; }) {}
+        : WaveletMatrix(a.size(), [&](int i) { return a[i]; }) {}
     template<class Gen> WaveletMatrix(int _n, Gen gen) : n(_n) {
         vector<T> a(n), l(n), r(n);
         for (int i = 0; i < n; i++)

@@ -9,7 +9,7 @@ echo
 echo "---------- Compilation ---------"
 start=`date +%s.%N`
 g++ -include bits/stdc++.h -include lib/debug.h -std=c++14 -DLOCAL \
--Wall -Wextra -Wconversion -Wshadow -Wfloat-equal \
+-Wall -Wextra -Wconversion -Wshadow -Wfloat-equal -Wno-shorten-64-to-32 \
 `# -O2` \
 `# -fsanitize=undefined -fsanitize=address` \
 -o a.out $(fd -Iae cpp --changed-within 3s)

@@ -10,7 +10,7 @@ template<class S, class F> struct LazySegTree {
     LazySegTree() : LazySegTree(0) {}
     LazySegTree(int _n) : LazySegTree(vector<S>(_n, S::e())) {}
     LazySegTree(const vector<S> &v)
-        : n((int)v.size()), lg(0), t(2 * n, S::e()), lz(n, F::id()) {
+        : n(v.size()), lg(0), t(2 * n, S::e()), lz(n, F::id()) {
         while (1 << lg < n) lg++;
         copy(begin(v), end(v), begin(t) + n);
         for (int i = n - 1; i >= 1; i--) update(i);

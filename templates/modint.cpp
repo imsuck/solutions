@@ -6,14 +6,14 @@ using namespace std;
 
 // clang-format off
 template<uint32_t m> struct modint {
-    static_assert(int(m) >= 1, "Modulus must be in the range [1;2^31)");
+    static_assert(m >= 1, "Modulus must be in the range [1;2^31)");
 
     using mint = modint;
 
   public:
     static constexpr uint32_t mod() { return m; }
     modint() : _v(0) {}
-    modint(int64_t v) : _v((uint32_t)((v %= m) < 0 ? v + m : v)) {}
+    modint(int64_t v) : _v((v %= m) < 0 ? v + m : v) {}
     static mint raw(uint32_t v) { return *reinterpret_cast<mint *>(&v); }
     template<class T> constexpr explicit operator T() const { return _v; }
 
@@ -41,7 +41,7 @@ template<uint32_t m> struct modint {
         return *this;
     }
     constexpr mint &operator*=(const mint &rhs) {
-        return _v = int(uint64_t(_v) * rhs._v % mod()), *this;
+        return _v = uint64_t(_v) * rhs._v % mod(), *this;
     }
     constexpr mint &operator/=(const mint &rhs) {
         return *this = *this * rhs.inv();

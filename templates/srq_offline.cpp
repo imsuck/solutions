@@ -8,7 +8,7 @@ using namespace std;
 template<class T, class Q, class Op> struct RangeQueryOffline {
   public:
     RangeQueryOffline(const vector<T> &v, const vector<Q> &_q, Op _op, T e)
-        : ans(_q.size()), n((int)v.size()), d(v), lef(v.size(), e),
+        : ans(_q.size()), n(v.size()), d(v), lef(v.size(), e),
           rig(v.size(), e), idx(_q.size()), q(_q), op(_op) {
         iota(begin(idx), end(idx), 0);
     }

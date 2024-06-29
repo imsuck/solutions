@@ -26,7 +26,8 @@ namespace utils {
         return u64((__uint128_t)a * b % m);
     #endif
         u64 res = mulhi(a, b) % m;
-        for (u32 i = 0; i < 64; i++) res <<= 1, res -= (res >= m) * m;
+        if (m < 1 << 32) res = res*((1<<63)%m)%m, res<<=1, res-=(res>=m)*m;
+        else for (u32 i = 0; i < 64; i++) res <<= 1, res -= (res >= m) * m;
         res += a * b % m;
         return res - (res >= m) * m;
     }
