@@ -2,7 +2,7 @@
 using namespace std;
 
 #ifndef LOCAL
-    #define dbg(...) 42
+#define dbg(...) 42
 #endif
 
 using i32 = int32_t;
@@ -22,7 +22,13 @@ using str = string;
 #define eb emplace_back
 
 void solve() {
-    
+    i32 x1, x2, x3;
+    cin >> x1 >> x2 >> x3;
+    i32 mn = 100000;
+    for (i32 i = 0; i <= 10; i++) {
+        mn = min(mn, abs(i - x1) + abs(i - x2) + abs(i - x3));
+    }
+    cout << mn << "\n";
 }
 
 int main() {

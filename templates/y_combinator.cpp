@@ -7,4 +7,4 @@ template<class Fn> struct add_recursion_t {
         return fn(*this, args...);
     }
 };
-template<class Fn> auto make_recur(Fn &&f) { return add_recursion_t<Fn>{f}; }
+template<class Fn> auto make_recur(Fn f) { return add_recursion_t<Fn>{f}; }

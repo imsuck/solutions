@@ -20,7 +20,7 @@ template<class Fn> struct Timer {
         end = max(steady_clock::now(), end);
         if (done)
             return;
-        fn(end - start);
+        fn(end - start), cout << flush;
     }
     #endif
 };

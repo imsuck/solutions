@@ -11,6 +11,8 @@ struct DSU {
 
     i32 find_set(i32 v) { return v == par[v] ? v : par[v] = find_set(par[v]); }
 
+    bool same(i32 a, i32 b) { return find_set(a) == find_set(b); }
+
     bool union_sets(i32 a, i32 b) {
         a = find_set(a), b = find_set(b);
         if (a == b)

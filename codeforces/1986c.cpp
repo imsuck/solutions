@@ -22,7 +22,21 @@ using str = string;
 #define eb emplace_back
 
 void solve() {
-    
+    i32 n, m;
+    cin >> n >> m;
+    str s, t;
+    vec<i32> idx(m);
+    cin >> s;
+    for (i32 &i : idx)
+        cin >> i, i--;
+    cin >> t;
+    sort(all(idx));
+    sort(all(t));
+    idx.erase(unique(all(idx)), end(idx));
+    for (i32 i = 0; i < idx.size(); i++) {
+        s[idx[i]] = t[i];
+    }
+    cout << s << "\n";
 }
 
 int main() {
@@ -30,5 +44,6 @@ int main() {
     cin.tie(nullptr);
     i32 t = 1;
     cin >> t;
-    while (t--) solve();
+    while (t--)
+        solve();
 }
