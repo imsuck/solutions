@@ -1,6 +1,7 @@
 #include <cstdint>
 
 // clang-format off
+#pragma GCC diagnostic ignored "-Wconversion"
 namespace utils {
     using u32 = std::uint32_t;
     using u64 = std::uint64_t;
@@ -32,6 +33,7 @@ namespace utils {
         return res - (res >= m) * m;
     }
 } // namespace utils
+#pragma GCC diagnostic warning "-Wconversion"
 // clang-format on
 
 using utils::mulhi;

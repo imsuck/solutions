@@ -2,6 +2,7 @@
 using namespace std;
 
 // clang-format off
+#pragma GCC diagnostic ignored "-Wconversion"
 template<class T, class Op> struct RangeQuery {
   public:
     RangeQuery(const vector<T> &v, Op _op, T e)
@@ -40,4 +41,5 @@ template<class T, class Op> struct RangeQuery {
 template<class T, class Op> auto make_rq(const vector<T> &v, Op op, T e) {
     return RangeQuery<T, Op>{v, op, e};
 }
+#pragma GCC diagnostic warning "-Wconversion"
 // clang-format on

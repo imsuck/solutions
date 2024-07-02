@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// clang-format off
 struct DSU {
     using i32 = int32_t;
     vector<i32> par, sz;
@@ -15,12 +16,11 @@ struct DSU {
 
     bool union_sets(i32 a, i32 b) {
         a = find_set(a), b = find_set(b);
-        if (a == b)
-            return false;
-        if (sz[a] < sz[b])
-            swap(a, b);
+        if (a == b) return false;
+        if (sz[a] < sz[b]) swap(a, b);
         sz[a] += sz[b];
         par[b] = a;
         return true;
     }
 };
+// clang-format on

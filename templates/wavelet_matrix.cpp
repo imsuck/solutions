@@ -7,6 +7,8 @@ using namespace std;
 using u32 = uint32_t;
 using u64 = uint64_t;
 
+// clang-format off
+#pragma GCC diagnostic ignored "-Wconversion"
 struct BitVec {
   public:
     BitVec() = default;
@@ -32,9 +34,7 @@ struct BitVec {
 
   private:
     static constexpr int wordsize = numeric_limits<size_t>::digits;
-    struct node {
-        size_t bit = 0, sum = 0;
-    };
+    struct node { size_t bit = 0, sum = 0; };
     vector<node> v;
     static inline constexpr int popcnt64(size_t x) {
 #ifdef __GNUC__
@@ -97,8 +97,7 @@ struct WaveletMatrix {
         int res = 0;
         for (int log = bit_num - 1; log >= 0; --log) {
             bool u = upper >> log & 1;
-            if (u)
-                res += bv[log].rank(0, l, r);
+            if (u) res += bv[log].rank(0, l, r);
             succ(l, r, u, log);
         }
         return res;
@@ -116,3 +115,5 @@ struct WaveletMatrix {
         r = b * mid[lg] + bv[lg].rank(b, r);
     }
 };
+#pragma GCC diagnostic warning "-Wconversion"
+// clang-format on
