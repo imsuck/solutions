@@ -10,7 +10,6 @@ using u64 = uint64_t;
 // clang-format off
 #pragma GCC diagnostic ignored "-Wconversion"
 struct BitVec {
-  public:
     BitVec() = default;
     explicit BitVec(int n, const vector<bool> &a)
         : BitVec(n, [&](int i) { return a[i]; }) {}
@@ -50,7 +49,6 @@ struct BitVec {
 // suisen-cp's cp-library-cpp
 template<class T, int bit_num = numeric_limits<T>::digits>
 struct WaveletMatrix {
-  public:
     WaveletMatrix() = default;
     explicit WaveletMatrix(const vector<T> &a)
         : WaveletMatrix(a.size(), [&](int i) { return a[i]; }) {}

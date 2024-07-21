@@ -2,7 +2,6 @@
 using namespace std;
 
 template<class T> struct Compressor {
-  public:
     Compressor(const vector<T> &a) : v(a) {
         sort(begin(v), end(v));
         v.erase(unique(begin(v), end(v)), end(v));

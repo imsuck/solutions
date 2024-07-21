@@ -70,12 +70,7 @@ template<ty T> str to_str(const T &x) {
     s += "}";
     return s;
 }
-template<size_t N> str to_str(const bitset<N> &b) {
-    str s = "";
-    for (size_t i = N - 1; i > 0; i--) s += b[i] + '0';
-    s += b[0] + '0';
-    return s;
-}
+template<size_t N> str to_str(const bitset<N> &b) { return b.to_string(); }
 
 str _fmt() { return ""; }
 template<ty T, ty... U> str _fmt(const T &t, const U &...u) {

@@ -1,45 +1,53 @@
+#include <numeric>
 #include <vector>
 using namespace std;
 
+// https://usaco.guide/plat/DC-SRQ
+// Not really optimized I just wrote this on a whim
 // clang-format off
 #pragma GCC diagnostic ignored "-Wconversion"
-template<class T, class Op> struct RangeQuery {
-  public:
-    RangeQuery(const vector<T> &v, Op _op, T e)
-        : n(v.size()), lg(__lg(n - 1) + 1), d(v), mask(n),
-          dat(lg, vector<T>(n, e)), op(_op) {
-        build(0, n - 1, 0);
+template<class T, class Q, class Op> struct RangeQuery {
+    RangeQuery(const vector<T> &v, const vector<Q> &_q, Op _op, T e)
+        : ans(_q.size()), n(v.size()), d(v), lef(n, e), rig(n, e),
+          idx(_q.size()), q(_q), op(_op) {
+        iota(begin(idx), end(idx), 0);
     }
+    void solve() { _solve(0, n - 1, idx); }
 
-    T query(int l, int r) {
-        r--;
-        if (l == r) return d[l];
-        int bits = __builtin_ctz(mask[l] ^ mask[r]);
-        return op(dat[bits][l], dat[bits][r]);
-    }
+    vector<T> ans;
 
   private:
-    int n, lg;
-    vector<T> d;
-    vector<int> mask;
-    vector<vector<T>> dat;
+    int n;
+    vector<T> d, lef, rig;
+    vector<int> idx;
+    vector<Q> q;
     Op op;
-    void build(int l, int r, int lvl) {
-        if (l == r) return;
+    void _solve(int l, int r, vector<int> &qry) {
+        if (qry.empty()) return;
+        if (l == r) {
+            for (int &i : qry) ans[i] = d[l];
+            return;
+        }
         int m = (l + r) / 2;
-        dat[lvl][m] = d[m];
-        for (int i = m - 1; i >= l; i--)
-            dat[lvl][i] = op(d[i], dat[lvl][i + 1]);
-        dat[lvl][m + 1] = d[m + 1];
-        for (int i = m + 2; i < r + 1; i++)
-            dat[lvl][i] = op(dat[lvl][i - 1], d[i]);
-        for (int i = m + 1; i < r + 1; i++) mask[i] ^= 1 << lvl;
-        build(l, m, lvl + 1);
-        build(m + 1, r, lvl + 1);
+        lef[m] = d[m];
+        for (int i = m - 1; i >= l; i--) lef[i] = op(d[i], lef[i + 1]);
+        rig[m + 1] = d[m + 1];
+        for (int i = m + 2; i < r + 1; i++) rig[i] = op(rig[i - 1], d[i]);
+        vector<int> le, ri;
+        for (int i : qry) {
+            if (q[i].l <= m && m < q[i].r) {
+                ans[i] = op(lef[q[i].l], rig[q[i].r]);
+                continue;
+            }
+            (q[i].l <= m ? le : ri).push_back(i);
+        }
+        _solve(l, m, le);
+        _solve(m + 1, r, ri);
     }
 };
-template<class T, class Op> auto make_rq(const vector<T> &v, Op op, T e) {
-    return RangeQuery<T, Op>{v, op, e};
+template<class T, class Q, class Op>
+auto make_rq(const vector<T> &v, const vector<Q> &q, Op op, T e) {
+    return RangeQuery<T, Q, Op>{v, q, op, e};
 }
 #pragma GCC diagnostic warning "-Wconversion"
 // clang-format on
