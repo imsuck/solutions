@@ -27,7 +27,7 @@ struct LazySegTree {
         return push_to(p), t[p + m];
     }
 
-    S all_prod() { return t[1]; }
+    S all_prod() const { return t[1]; }
     S prod(int l, int r) {
         assert(0 <= l && l <= r && r <= n);
         if (l == r) return M::e;

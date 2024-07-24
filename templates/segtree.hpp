@@ -6,7 +6,7 @@ using namespace std;
 // clang-format off
 #pragma GCC diagnostic ignored "-Wconversion"
 template<class M, class S = typename M::S> struct SegTree {
-    SegTree() : SegTree(0) {}
+    SegTree() = default;
     SegTree(int _n) : n(_n), t(n * 2, M::e) {}
     SegTree(const vector<S> &v) : SegTree(v.size()) {
         copy(begin(v), end(v), begin(t) + n);
@@ -28,7 +28,7 @@ template<class M, class S = typename M::S> struct SegTree {
             if (l & 1) resl = M::op(resl, t[l++]);
             if (r & 1) resr = M::op(t[--r], resr);
         }
-        return resl + resr;
+        return M::op(resl, resr);
     }
 
   private:

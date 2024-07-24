@@ -10,6 +10,9 @@ using i64 = int64_t;
 using u64 = uint64_t;
 using str = string;
 
+
+#pragma GCC diagnostic ignored "-Wc++17-extensions"
+
 #ifdef __SIZEOF_INT128__
 using i128 = __int128_t;
 using u128 = __uint128_t;
@@ -30,36 +33,35 @@ str to_str(u128 x) {
 str to_str(bool b) { return b ? "true" : "false"; }
 str to_str(char c) { return "'" + str(1, c) + "'"; }
 str to_str(const str &s) { return '"' + s + '"'; }
+template<size_t N> str to_str(const bitset<N> &b) { return b.to_string(); }
 
-template<ty T> str to_str(const vector<T> &x);
-template<ty T> str to_str(T x[]);
-template<ty T> str to_str(const T &x);
-template<size_t N> str to_str(const bitset<N> &b);
+template<ty T, ty U> str to_str(const pair<T, U>&);
+template<ty T> str to_str(const vector<T>&);
+template<ty T, size_t N> str to_str(const array<T, N>&);
+template<ty T> str to_str(const T&);
+
+template<size_t i = 0, class... Ts> string tup_str_helper(const tuple<Ts...> &t) {
+    if constexpr (i == sizeof...(Ts)) { return ""; }
+    else return (i ? ", " : "") + to_string(get<i>(t)) + tup_str_helper<i + 1>(t);
+}
+template<class... Ts> str to_str(const tuple<Ts...> &tup) {
+    return "(" + tup_str_helper(tup) + ")";
+}
 
 template<ty T, ty U> str to_str(const pair<T, U> &p) {
     return "(" + to_str(p.first) + ", " + to_str(p.second) + ")";
 }
-template<ty T, ty U, ty V> str to_str(const tuple<T, U, V> &t) {
-    return "(" + to_str(get<0>(t)) + ", " + to_str(get<1>(t)) + ", " +
-           to_str(get<2>(t)) + ")";
-}
-template<ty T, ty U, ty V, ty W> str to_str(const tuple<T, U, V, W> &t) {
-    return "(" + to_str(get<0>(t)) + ", " + to_str(get<1>(t)) + ", " +
-           to_str(get<2>(t)) + ", " + to_str(get<3>(t)) + ")";
-}
-
-template<ty T> str to_str(const vector<T> &x) {
+template<ty T> str to_str(const vector<T> &v) {
     i32 f = 0;
     str s = "[";
-    for (const auto &i : x) s += (f++ ? ", " : "") + to_str(i);
+    for (const auto &i : v) s += (f++ ? ", " : "") + to_str(i);
     s += "]";
     return s;
 }
-template<ty T> str to_str(T x[]) {
+template<ty T, size_t N> str to_str(const array<T, N> &arr) {
     i32 f = 0;
     str s = "[";
-    for (auto it = begin(x); it != end(x); it++)
-        s += (f++ ? ", " : "") + to_str(*it);
+    for (const auto &i : arr) s += (f++ ? ", " : "") + to_str(i);
     s += "]";
     return s;
 }
@@ -70,24 +72,29 @@ template<ty T> str to_str(const T &x) {
     s += "}";
     return s;
 }
-template<size_t N> str to_str(const bitset<N> &b) { return b.to_string(); }
 
-str _fmt() { return ""; }
-template<ty T, ty... U> str _fmt(const T &t, const U &...u) {
+
+inline str _fmt() { return ""; }
+template<ty T, ty... U> str _fmt(T &&t, U &&...u) {
     return to_str(t) + (sizeof...(u) ? ", " : "") + _fmt(u...);
 }
 
-#define dbg_1(a)                                                               \
-    cerr << "[\e[33mDEBUG\e[0m:" << __LINE__ << "] " << #a << " = "            \
-         << to_string(a) << "\n"
-#define dbg_mul(a...)                                                          \
-    cerr << "[\e[33mDEBUG\e[0m:" << __LINE__ << "] "                           \
-         << "[" << #a << "] = [" << _fmt(a) << "]\n"
-#define GET_MACRO(_1, _2, _3, _4, _5, _6, _7, _8, NAME, ...) NAME
-#define dbg(...)                                                               \
-    GET_MACRO(__VA_ARGS__, dbg_mul, dbg_mul, dbg_mul, dbg_mul, dbg_mul,        \
-              dbg_mul, dbg_mul, dbg_1)                                         \
-    (__VA_ARGS__)
+template<class T>
+void _print(const str &vars, int line, const T &x) {
+    cerr << "[\e[33mDEBUG\e[0m:" << line << "] ";
+    cerr << vars << " = " << to_str(x) << "\n";
+}
+template<class... Args, enable_if_t<sizeof...(Args) != 1, int> = 1>
+void _print(const str &vars, int line, Args &&...args) {
+    cerr << "[\e[33mDEBUG\e[0m:" << line << "] ";
+    cerr << "[" << vars << "]";
+    cerr << " = ";
+    cerr << "[" << _fmt(args...) << "]\n";
+}
+
+#define dbg(a...) _print(#a, __LINE__, a)
 
 #undef ty
 #undef to_str
+
+#pragma GCC diagnostic warning "-Wc++17-extensions"
