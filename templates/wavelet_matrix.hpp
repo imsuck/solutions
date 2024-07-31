@@ -8,6 +8,7 @@ using u32 = uint32_t;
 using u64 = uint64_t;
 
 // clang-format off
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 struct BitVec {
     BitVec() = default;
@@ -113,5 +114,5 @@ struct WaveletMatrix {
         r = b * mid[lg] + bv[lg].rank(b, r);
     }
 };
-#pragma GCC diagnostic warning "-Wconversion"
+#pragma GCC diagnostic pop
 // clang-format on

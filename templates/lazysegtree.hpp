@@ -4,14 +4,14 @@ using namespace std;
 
 // M: S M::e, F M::id, S op(S, S), F comp(F, F), bool map(F, &S)
 // clang-format off
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 template<class M, class S = typename M::S, class F = typename M::F>
 struct LazySegTree {
     LazySegTree() = default;
     LazySegTree(int _n) : n(_n) {
         while (1 << lg < n) lg++;
-        m = 1 << lg;
-        t.assign(m * 2, M::e), upd.assign(m, false), lz.assign(m, M::id);
+        m = 1 << lg, t.assign(m * 2, M::e), upd.resize(m), lz.assign(m, M::id);
     }
     LazySegTree(const vector<S> &v) : LazySegTree(v.size()) {
         copy(begin(v), end(v), begin(t) + m);
@@ -69,6 +69,7 @@ struct LazySegTree {
     }
     void all_apply(int p, const F &f) {
         bool ok = M::map(f, t[p]);
+        assert(p < m || ok);
         if (p < m) {
             lz[p] = M::comp(f, lz[p]), upd[p] = true;
             if (!ok) push(p), update(p);
@@ -84,5 +85,5 @@ struct LazySegTree {
         for (int i = lg; i >= 1; i--) push(p >> i);
     }
 };
-#pragma GCC diagnostic warning "-Wconversion"
+#pragma GCC diagnostic pop
 // clang-format on

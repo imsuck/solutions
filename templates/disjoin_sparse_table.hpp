@@ -19,7 +19,7 @@ template<class M, class S = typename M::S> struct DisjointSparseTable {
         }
     }
 
-    S query(int l, int r) const {
+    S prod(int l, int r) const {
         assert(0 <= l && l <= r && r <= n);
         if (l == r) return M::e;
         r--;

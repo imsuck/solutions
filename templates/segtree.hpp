@@ -4,6 +4,7 @@ using namespace std;
 
 // Modified version of atcoder library's segtree.hpp
 // clang-format off
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 template<class M, class S = typename M::S> struct SegTree {
     SegTree() = default;
@@ -36,5 +37,5 @@ template<class M, class S = typename M::S> struct SegTree {
     vector<S> t;
     void update(int p) { t[p] = M::op(t[p << 1], t[p << 1 | 1]); }
 };
-#pragma GCC diagnostic warning "-Wconversion"
+#pragma GCC diagnostic pop
 // clang-format on

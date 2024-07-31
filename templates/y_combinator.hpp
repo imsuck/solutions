@@ -1,10 +1,12 @@
+#include <type_traits>
 using namespace std;
 
-// Not the exact y combinator but good enough
-template<class Fn> struct add_recursion_t {
+template<class Fn> struct recur_t {
     Fn fn;
-    template<class... Args> auto operator()(Args &&...args) {
-        return fn(*this, args...);
+    template<class... Args> decltype(auto) operator()(Args &&...args) {
+        return fn(/* ref */(*this), forward<Args>(args)...);
     }
 };
-template<class Fn> auto make_recur(Fn f) { return add_recursion_t<Fn>{f}; }
+template<class Fn> decltype(auto) make_recur(Fn &&f) {
+    return recur_t<decay_t<Fn>>{forward<Fn>(f)};
+}

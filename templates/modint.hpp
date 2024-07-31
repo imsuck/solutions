@@ -5,6 +5,7 @@
 using namespace std;
 
 // clang-format off
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 template<uint32_t m> struct modint {
     static_assert(m >= 1, "Modulus must be in the range [1;2^31)");
@@ -12,61 +13,60 @@ template<uint32_t m> struct modint {
     using mint = modint;
 
   public:
-    static constexpr uint32_t mod() { return m; }
-    modint() : _v(0) {}
-    modint(int64_t v) : _v((v %= m) < 0 ? v + m : v) {}
-    static mint raw(uint32_t v) { return *reinterpret_cast<mint *>(&v); }
-    template<class T> constexpr explicit operator T() const { return _v; }
+    static constexpr uint32_t mod() noexcept { return m; }
+    constexpr modint() noexcept = default;
+    constexpr modint(int64_t v) noexcept : _v((v %= m) < 0 ? v + m : v) {}
+    constexpr static mint raw(uint32_t v) noexcept { mint x; return x._v, x; }
+    template<class T> constexpr explicit operator T() const noexcept { return _v; }
 
-    constexpr mint &operator++() {
+    constexpr mint &operator++() noexcept {
         _v++;
         if (_v == mod()) _v = 0;
         return *this;
     }
-    constexpr mint &operator--() {
+    constexpr mint &operator--() noexcept {
         if (_v == 0) _v = mod();
         _v--;
         return *this;
     }
-    constexpr mint operator++(int) { return exchange(*this, ++mint(*this)); }
-    constexpr mint operator--(int) { return exchange(*this, --mint(*this)); }
+    constexpr mint operator++(int) noexcept { return exchange(*this, ++mint(*this)); }
+    constexpr mint operator--(int) noexcept { return exchange(*this, --mint(*this)); }
 
-    constexpr mint &operator+=(const mint &rhs) {
+    constexpr mint &operator+=(const mint &rhs) noexcept {
         _v += rhs._v;
         if (_v >= mod()) _v -= mod();
         return *this;
     }
-    constexpr mint &operator-=(const mint &rhs) {
+    constexpr mint &operator-=(const mint &rhs) noexcept {
         _v += mod() - rhs._v;
         if (_v >= mod()) _v -= mod();
         return *this;
     }
-    constexpr mint &operator*=(const mint &rhs) {
+    constexpr mint &operator*=(const mint &rhs) noexcept {
         return _v = uint64_t(_v) * rhs._v % mod(), *this;
     }
-    constexpr mint &operator/=(const mint &rhs) {
+    constexpr mint &operator/=(const mint &rhs) noexcept {
         return *this = *this * rhs.inv();
     }
 
-    constexpr friend mint operator+(mint l, const mint &r) { return l += r; }
-    constexpr friend mint operator-(mint l, const mint &r) { return l -= r; }
-    constexpr friend mint operator*(mint l, const mint &r) { return l *= r; }
-    constexpr friend mint operator/(mint l, const mint &r) { return l /= r; }
+    constexpr friend mint operator+(mint l, const mint &r) noexcept { return l += r; }
+    constexpr friend mint operator-(mint l, const mint &r) noexcept { return l -= r; }
+    constexpr friend mint operator*(mint l, const mint &r) noexcept { return l *= r; }
+    constexpr friend mint operator/(mint l, const mint &r) noexcept { return l /= r; }
 
-    friend mint operator==(const mint &l, const mint &r) {
-        return l._v == r._v;
-    }
-    friend mint operator!=(const mint &l, const mint &r) {
-        return l._v != r._v;
-    }
+    constexpr mint operator+() const noexcept { return *this; }
+    constexpr mint operator-() const noexcept { return raw(_v ? mod() - _v : 0); }
 
-    constexpr mint pow(int64_t n) const {
-        mint b = *this, res(1);
+    constexpr friend mint operator==(const mint &l, const mint &r) noexcept { return l._v == r._v; }
+    constexpr friend mint operator!=(const mint &l, const mint &r) noexcept { return l._v != r._v; }
+
+    constexpr mint pow(uint64_t n) const noexcept {
+        mint b = *this, res = 1;
         while (n) n & 1 ? res *= b : 0, b *= b, n >>= 1;
         return res;
     }
 
-    constexpr mint inv() const {
+    constexpr mint inv() const noexcept {
         int a = _v, b = mod(), x = 1, y = 0;
         while (a) {
             y = exchange(x, y - b / a * x);
@@ -76,9 +76,6 @@ template<uint32_t m> struct modint {
         return y;
     }
 
-    constexpr mint operator+() const { return *this; }
-    constexpr mint operator-() const { return raw(_v ? mod() - _v : 0); }
-
     friend istream &operator>>(istream &is, mint &x) {
         int64_t v{};
         return is >> v, x = v, is;
@@ -86,7 +83,9 @@ template<uint32_t m> struct modint {
     friend ostream &operator<<(ostream &os, const mint &x) { return os << x._v; }
 
   private:
-    uint32_t _v;
+    uint32_t _v = 0;
 };
-#pragma GCC diagnostic warning "-Wconversion"
+using modint107 = modint<1'000'000'007>;
+using modint998 = modint<998'244'353>;
+#pragma GCC diagnostic pop
 // clang-format on

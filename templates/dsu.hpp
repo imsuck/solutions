@@ -10,12 +10,10 @@ struct DSU {
         iota(begin(par), end(par), 0);
     }
 
-    i32 find_set(i32 v) { return v == par[v] ? v : par[v] = find_set(par[v]); }
-
-    bool same(i32 a, i32 b) { return find_set(a) == find_set(b); }
-
-    bool union_sets(i32 a, i32 b) {
-        a = find_set(a), b = find_set(b);
+    i32 find(i32 v) { return v == par[v] ? v : par[v] = find(par[v]); }
+    bool same(i32 a, i32 b) { return find(a) == find(b); }
+    bool merge(i32 a, i32 b) {
+        a = find(a), b = find(b);
         if (a == b) return false;
         if (sz[a] < sz[b]) swap(a, b);
         sz[a] += sz[b];

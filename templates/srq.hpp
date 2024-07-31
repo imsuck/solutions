@@ -5,6 +5,7 @@ using namespace std;
 // https://usaco.guide/plat/DC-SRQ
 // Not really optimized I just wrote this on a whim
 // clang-format off
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 template<class T, class Q, class Op> struct RangeQuery {
     RangeQuery(const vector<T> &v, const vector<Q> &_q, Op _op, T e)
@@ -49,5 +50,5 @@ template<class T, class Q, class Op>
 auto make_rq(const vector<T> &v, const vector<Q> &q, Op op, T e) {
     return RangeQuery<T, Q, Op>{v, q, op, e};
 }
-#pragma GCC diagnostic warning "-Wconversion"
+#pragma GCC diagnostic pop
 // clang-format on
