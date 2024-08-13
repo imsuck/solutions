@@ -68,12 +68,12 @@ template<uint32_t m> struct modint {
 
     constexpr mint inv() const noexcept {
         int a = _v, b = mod(), x = 1, y = 0;
-        while (a) {
-            y = exchange(x, y - b / a * x);
-            b = exchange(a, b % a);
+        while (b) {
+            x = exchange(y, x - a / b * y);
+            a = exchange(b, a % b);
         }
-        assert(b == 1);
-        return y;
+        assert(a == 1);
+        return x;
     }
 
     friend istream &operator>>(istream &is, mint &x) {

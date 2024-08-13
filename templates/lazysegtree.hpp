@@ -42,7 +42,7 @@ struct LazySegTree {
 
     void apply(int p, const F &f) {
         assert(0 <= p && p < n);
-        push_to(p), t[p + m] = M::map(f, t[p + m]), update_from(p);
+        push_to(p), M::map(f, t[p + m]), update_from(p);
     }
     void apply(int l, int r, const F &f) {
         assert(0 <= l && l <= r && r <= n);

@@ -11,6 +11,7 @@ using u64 = uint64_t;
 using str = string;
 
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wc++17-extensions"
 
 #ifdef __SIZEOF_INT128__
@@ -97,4 +98,4 @@ void _print(const str &vars, int line, Args &&...args) {
 #undef ty
 #undef to_str
 
-#pragma GCC diagnostic warning "-Wc++17-extensions"
+#pragma GCC diagnostic pop
