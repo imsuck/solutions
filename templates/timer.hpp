@@ -2,6 +2,23 @@
 using namespace std;
 using namespace chrono;
 
+#if false
+struct Timer {
+    string _msg;
+    time_point<steady_clock> start, end;
+    void stop() { end = steady_clock::now(); }
+    Timer() = default;
+    Timer(const string &msg) : _msg(msg), start(steady_clock::now()) {}
+    ~Timer() {
+        cerr << _msg + (_msg.empty() ? "" : ": ")
+             << (duration_cast<microseconds>(steady_clock::now() - start)
+                     .count() /
+                 1e6l)
+             << "s\n";
+    }
+};
+#endif
+
 #if true
 template<class Fn> struct Timer {
     Fn fn;
