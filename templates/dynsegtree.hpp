@@ -11,25 +11,22 @@ template<class I, class M, class S = typename M::S> struct DynSegTree {
         assert(0 <= p && p < n);
         auto d = [&](auto self, const auto &t) {
             if (t->leaf()) return void(t->val = x);
-            I m = (t->l + t->r) / 2;
-            if (p < m) self(self, t->c(0));
-            else self(self, t->c(1));
+            self(self, t->c(p >= t->m()));
             t->val = M::op(val(t->left), val(t->right));
         };
         d(d, root);
     }
-    S get(I p) const {
+    S operator[](I p) const {
         assert(0 <= p && p < n);
-        auto d = [&](auto &&self, const node_ptr &t) {
+        auto d = [&](auto self, const node_ptr &t) {
             if (!t) return M::e;
             if (t->leaf()) return t->val;
-            I m = (t->l + t->r) / 2;
-            return p < m ? self(self, t->left) : self(self, t->right);
+            return p < t->m() ? self(self, t->left) : self(self, t->right);
         };
         return d(d, root);
     }
-    S prod_all() const { return root->val; }
-    S prod(I l, I r) const {
+    S get(int p) const { return (*this)[p]; }
+    S operator()(I l, I r) const {
         assert(0 <= l && l <= r && r <= n);
         auto d = [&](auto self, const node_ptr &t) {
             if (!t) return M::e;
@@ -40,6 +37,8 @@ template<class I, class M, class S = typename M::S> struct DynSegTree {
 
         return d(d, root);
     }
+    S prod(I l, I r) const { return (*this)(l, r); }
+    S prod_all() const { return root->val; }
 
   private:
     struct Node;
@@ -52,11 +51,11 @@ template<class I, class M, class S = typename M::S> struct DynSegTree {
         Node() = default;
         Node(int lb, int rb) : l(lb), r(rb) {}
 
-        inline bool leaf() const { return l == r - 1; }
+        inline bool leaf() const { return r - l == 1; }
+        inline I m() const { return (l + r) / 2; }
         node_ptr &c(bool z) {
-            I m = (l + r) / 2;
-            if (!z) return left ? left : left = new Node(l, m);
-            else return right ? right : right = new Node(m, r);
+            if (!z) return left ? left : left = new Node(l, m());
+            else return right ? right : right = new Node(m(), r);
         }
     };
 

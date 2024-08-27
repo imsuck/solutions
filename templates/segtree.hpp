@@ -17,12 +17,12 @@ template<class M, class S = typename M::S> struct SegTree {
         assert(0 <= p && p < n);
         for (t[p += n] = val; p >>= 1;) update(p);
     }
-    S get(int p) const {
+    S operator[](int p) const {
         assert(0 <= p && p < n);
         return t[p + n];
     }
-    S all_prod() const { return prod(0, n); }
-    S prod(int l, int r) const {
+    S get(int p) const { return (*this)[p]; }
+    S operator()(int l, int r) const {
         assert(0 <= l && l <= r && r <= n);
         S resl = M::e, resr = M::e;
         for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
@@ -31,6 +31,8 @@ template<class M, class S = typename M::S> struct SegTree {
         }
         return M::op(resl, resr);
     }
+    S prod(int l, int r) const { return (*this)(l, r); }
+    S all_prod() const { return (*this)(0, n); }
 
   private:
     int n;

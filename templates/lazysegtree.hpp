@@ -22,13 +22,13 @@ struct LazySegTree {
         assert(0 <= p && p < n);
         push_to(p), t[p + m] = x, update_from(p);
     }
-    S get(int p) {
+    S operator[](int p) {
         assert(0 <= p && p < n);
         return push_to(p), t[p + m];
     }
+    S get(int p) { return (*this)[p]; }
 
-    S all_prod() const { return t[1]; }
-    S prod(int l, int r) {
+    S operator()(int l, int r) {
         assert(0 <= l && l <= r && r <= n);
         if (l == r) return M::e;
         push_to(l), push_to(r);
@@ -39,6 +39,8 @@ struct LazySegTree {
         }
         return M::op(sml, smr);
     }
+    S prod(int l, int r) { return (*this)(l, r); }
+    S all_prod() const { return t[1]; }
 
     void apply(int p, const F &f) {
         assert(0 <= p && p < n);
