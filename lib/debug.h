@@ -14,6 +14,16 @@ using str = string;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wc++17-extensions"
 
+template<ty T> struct streamable {
+    template<ty TT>
+    static auto test(int) -> decltype(declval<ostream &>() << declval<TT>(),
+                                      true_type());
+    template<ty> static auto test(...) -> false_type;
+
+    static constexpr bool value = decltype(test<T>(0))::value;
+};
+template<ty T> constexpr bool streamable_v = streamable<T>::value;
+
 #ifdef __SIZEOF_INT128__
 using i128 = __int128_t;
 using u128 = __uint128_t;
@@ -36,13 +46,14 @@ str to_str(char c) { return "'" + str(1, c) + "'"; }
 str to_str(const str &s) { return '"' + s + '"'; }
 template<size_t N> str to_str(const bitset<N> &b) { return b.to_string(); }
 
-template<ty T, ty U> str to_str(const pair<T, U>&);
-template<ty T> str to_str(const vector<T>&);
-template<ty T, size_t N> str to_str(const array<T, N>&);
-template<ty T> str to_str(const T&);
+template<ty T, ty U> str to_str(const pair<T, U> &);
+template<ty T> str to_str(const vector<T> &);
+template<ty T, size_t N> str to_str(const array<T, N> &);
+template<ty T, enable_if_t<streamable_v<T>, int>> str to_str(const T &);
+template<ty T, enable_if_t<!streamable_v<T>, int>> str to_str(const T &);
 
 template<size_t i = 0, class... Ts> string tup_str_helper(const tuple<Ts...> &t) {
-    if constexpr (i == sizeof...(Ts)) { return ""; }
+    if constexpr (i == sizeof...(Ts)) return "";
     else return (i ? ", " : "") + to_string(get<i>(t)) + tup_str_helper<i + 1>(t);
 }
 template<class... Ts> str to_str(const tuple<Ts...> &tup) {
@@ -66,7 +77,12 @@ template<ty T, size_t N> str to_str(const array<T, N> &arr) {
     s += "]";
     return s;
 }
-template<ty T> str to_str(const T &x) {
+template<ty T, enable_if_t<streamable_v<T>, int> = 1> str to_str(const T &x) {
+    stringstream ss;
+    ss << x;
+    return ss.str();
+}
+template<ty T, enable_if_t<!streamable_v<T>, int> = 1> str to_str(const T &x) {
     i32 f = 0;
     str s = "{";
     for (const auto &i : x) s += (f++ ? ", " : "") + to_str(i);
@@ -80,8 +96,7 @@ template<ty T, ty... U> str _fmt(T &&t, U &&...u) {
     return to_str(t) + (sizeof...(u) ? ", " : "") + _fmt(u...);
 }
 
-template<class T>
-void _print(const str &vars, int line, const T &x) {
+template<class T> void _print(const str &vars, int line, const T &x) {
     cerr << "[\e[33mDEBUG\e[0m:" << line << "] ";
     cerr << vars << " = " << to_str(x) << "\n";
 }

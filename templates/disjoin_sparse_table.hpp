@@ -3,8 +3,9 @@
 using namespace std;
 
 // clang-format off
-template<class M, class S = typename M::S> struct DisjointSparseTable {
-    DisjointSparseTable(const vector<S> &v) : n(int(v.size())) {
+template<class M> struct DisjointSparseTable {
+    using T = typename M::T;
+    DisjointSparseTable(const vector<T> &v) : n(int(v.size())) {
         t.push_back(v);
         for (int p = 1; 1 << p < n; p++) {
             t.emplace_back(n);
@@ -19,9 +20,9 @@ template<class M, class S = typename M::S> struct DisjointSparseTable {
         }
     }
 
-    S prod(int l, int r) const {
+    T prod(int l, int r) const {
         assert(0 <= l && l <= r && r <= n);
-        if (l == r) return M::e;
+        if (l == r) return M::id();
         r--;
         if (l == r) return t[0][l];
         int p = __bit_width(l ^ r) - 1;
@@ -30,6 +31,6 @@ template<class M, class S = typename M::S> struct DisjointSparseTable {
 
   private:
     int n;
-    vector<vector<S>> t;
+    vector<vector<T>> t;
 };
 // clang-format on

@@ -16,10 +16,10 @@ template<class M> struct Rerooting {
 
     template<class F, class G> vector<T> run(F &&_f, G &&_g) {
         apply_edge = _f, apply_vertex = _g;
-        dp_sub.resize(g.size(), M::id);
+        dp_sub.resize(g.size(), M::id());
         dp_all.resize(g.size());
         dfs_sub(0, -1);
-        dfs_all(0, -1, M::id);
+        dfs_all(0, -1, M::id());
         return dp_all;
     }
 
@@ -44,7 +44,7 @@ template<class M> struct Rerooting {
             ds.push_back(apply_edge(dp_sub[c], v, c, cost));
         }
         int n = int(ds.size());
-        vector head(n + 1, M::id), tail(n + 1, M::id);
+        vector head(n + 1, M::id()), tail(n + 1, M::id());
         for (int i = 0; i < n; i++) head[i + 1] = M::op(head[i], ds[i]);
         for (int i = n - 1; i >= 0; i--) tail[i] = M::op(ds[i], tail[i + 1]);
         dp_all[v] = apply_vertex(head[n], v);
