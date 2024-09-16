@@ -32,8 +32,8 @@ template<class T, int N> struct Matrix {
     constexpr friend Matrix operator*(const Matrix &l, const Matrix &r) {
         Matrix res;
         for (int i = 0; i < N; i++)
-            for (int j = 0; j < N; j++)
-                for (int k = 0; k < N; k++)
+            for (int k = 0; k < N; k++)
+                for (int j = 0; j < N; j++)
                     res[i][j] += l[i][k] * r[k][j];
         return res;
     }
@@ -61,10 +61,13 @@ template<class T, int N> struct Matrix {
 // TODO: Make this work for n*m matrices
 namespace with_mod {
 // clang-format off
-template<class T, int N, int mod> struct Matrix {
+template<class T, int N, int mod = 0> struct Matrix {
   private:
     template<class _> using vec = vector<_>;
-    static constexpr T mul(T a, T b) { return (uintmax_t)a * b % mod; }
+    static constexpr T mul(T a, T b) {
+        if constexpr (mod == 0) return a * b;
+        else a * b % mod;
+    }
 
   public:
     array<array<T, N>, N> mat;
@@ -85,8 +88,8 @@ template<class T, int N, int mod> struct Matrix {
     constexpr friend Matrix operator*(const Matrix &l, const Matrix &r) {
         Matrix res;
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                for (int k = 0; k < N; k++) {
+            for (int k = 0; k < N; k++) {
+                for (int j = 0; j < N; j++) {
                     res[i][j] += mul(l[i][k], r[k][j]);
                     if (res[i][j] >= mod) res[i][j] -= mod;
                 }

@@ -7,7 +7,7 @@ struct RollingHash {
     using u64 = uint64_t;
     static u64 gen_base() noexcept {
         mt19937_64 rng(random_device{}());
-        uniform_int_distribution<u64> dist(128, mod - 1);
+        uniform_int_distribution<u64> dist(1024, mod - 1);
         return dist(rng);
     }
 
@@ -44,14 +44,13 @@ struct RollingHash {
         return add(x >> 61, x & mod);
     }
     static constexpr u64 add(u64 a, u64 b) noexcept {
-        u64 r = a + b;
-        return r >= mod ? r - mod : r;
+        return (a += b) < mod ? a : a - mod;
     }
     static constexpr u64 mul(u64 a, u64 b) noexcept {
         u64 ha = a >> 31, la = a & mask31;
         u64 hb = b >> 31, lb = b & mask31;
         u64 m = ha * lb + la * hb;
         u64 hm = m >> 30, lm = m & mask30;
-        return fast_mod((ha * hb << 1) + hm + (lm << 31) + la * lb);
+        return fast_mod(ha * hb * 2 + hm + (lm << 31) + la * lb);
     }
 };

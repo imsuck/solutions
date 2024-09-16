@@ -25,7 +25,7 @@ template<class M> struct DisjointSparseTable {
         if (l == r) return M::id();
         r--;
         if (l == r) return t[0][l];
-        int p = __bit_width(l ^ r) - 1;
+        int p = __builtin_clz(1) - __builtin_clz(l ^ r);
         return M::op(t[p][l], t[p][r]);
     }
 

@@ -12,7 +12,7 @@ template<class M> struct SegTree {
     SegTree(int _n) : n(_n), t(n * 2, M::id()) {}
     SegTree(const vector<T> &v) : SegTree(v.size()) {
         copy(begin(v), end(v), begin(t) + n);
-        for (int i = n - 1; i > 0; i--) update(i);
+        for (int i = n; --i;) update(i);
     }
     void set(int p, T val) {
         assert(0 <= p && p < n);

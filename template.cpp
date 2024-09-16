@@ -3,6 +3,7 @@ using namespace std;
 
 #ifndef LOCAL
     #define dbg(...) 42
+    #define mark_dbg() if (false)
 #endif
 
 using i32 = int32_t;

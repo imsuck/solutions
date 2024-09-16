@@ -96,19 +96,20 @@ template<ty T, ty... U> str _fmt(T &&t, U &&...u) {
     return to_str(t) + (sizeof...(u) ? ", " : "") + _fmt(u...);
 }
 
-template<class T> void _print(const str &vars, int line, const T &x) {
-    cerr << "[\e[33mDEBUG\e[0m:" << line << "] ";
+template<class T> void _print(const str &func, const str &vars, int line, const T &x) {
+    cerr << "[\e[33m" << func << "\e[0m:" << line << "] ";
     cerr << vars << " = " << to_str(x) << "\n";
 }
-template<class... Args, enable_if_t<sizeof...(Args) != 1, int> = 1>
-void _print(const str &vars, int line, Args &&...args) {
-    cerr << "[\e[33mDEBUG\e[0m:" << line << "] ";
+template<class... Args> enable_if_t<sizeof...(Args) != 1>
+_print(const str &func, const str &vars, int line, Args &&...args) {
+    cerr << "[\e[33m" << func << "\e[0m:" << line << "] ";
     cerr << "[" << vars << "]";
     cerr << " = ";
     cerr << "[" << _fmt(args...) << "]\n";
 }
 
-#define dbg(a...) _print(#a, __LINE__, a)
+#define dbg(a...) _print(__func__, #a, __LINE__, a)
+#define mark_dbg()
 
 #undef ty
 #undef to_str

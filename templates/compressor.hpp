@@ -16,3 +16,4 @@ template<class T> struct Compressor {
   private:
     vector<T> v;
 };
+template<class T> Compressor<T> compress(const vector<T> &v) { return {v}; }

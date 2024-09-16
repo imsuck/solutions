@@ -15,7 +15,7 @@ template<class M> struct LazySegTree {
     }
     LazySegTree(const vector<T> &v) : LazySegTree(v.size()) {
         copy(begin(v), end(v), begin(t) + n);
-        for (int i = n - 1; i > 0; i--) update(i);
+        for (int i = n; --i;) update(i);
     }
 
     void set(int p, const T &x) {
