@@ -8,7 +8,7 @@ template<class T> struct Compressor {
     }
     bool find(T x) const { return binary_search(begin(v), end(v), x); }
     int operator()(T x) const {
-        return int(lower_bound(begin(v), end(v)) - begin(v));
+        return int(lower_bound(begin(v), end(v), x) - begin(v));
     }
     T operator[](int i) const { return v[i]; }
     int size() const { return (int)v.size(); }

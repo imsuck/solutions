@@ -1,12 +1,10 @@
 #include <type_traits>
 using namespace std;
 
-template<class F> struct y_comb_res {
-    F fn;
+template<class F> struct y_comb_t {
+    F f;
     template<class... Args> decltype(auto) operator()(Args &&...args) {
-        return fn(/* ref */(*this), forward<Args>(args)...);
+        return f(/* ref */(*this), forward<Args>(args)...);
     }
 };
-template<class F> decltype(auto) y_comb(F &&f) {
-    return y_comb_res<decay_t<F>>{forward<F>(f)};
-}
+template<class F> y_comb_t<decay_t<F>> y_comb(F &&f) { return {forward<F>(f)}; }
