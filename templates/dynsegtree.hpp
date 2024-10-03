@@ -1,6 +1,6 @@
 #include <cassert>
 
-template<class T> struct st_alloc;
+template<class> struct st_alloc;
 
 // clang-format off
 template<class M, class I = int> struct DynSegTree {

@@ -12,7 +12,7 @@ using i64 = int64_t;
 using u64 = uint64_t;
 using f32 = float;
 using f64 = double;
-using f128 = long double;
+using f80 = long double;
 using str = string;
 #define len() size()
 #define vec vector
