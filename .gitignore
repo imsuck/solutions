@@ -1,3 +1,10 @@
 *.out
 a.inp
 testing.cpp
+
+stress_testing/a.out
+stress_testing/safe.out
+stress_testing/tester
+stress_testing/a.inp
+stress_testing/a.output
+stress_testing/a.ans

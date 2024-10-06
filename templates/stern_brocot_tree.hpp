@@ -19,13 +19,13 @@ template<class Int> struct sbt_node {
         if (dir == Left) swap(a, b);
         for (; b; dir = !dir) {
             const Int q = a / b, r = a % b;
-            move_down(dir, q - (r == 0));
+            go_down(dir, q - (r == 0));
             a = exchange(b, r);
         }
     }
     sbt_node(const rational &x) : sbt_node(x.first, x.second) {}
     sbt_node(const sbt_path &path) {
-        for (const auto &[dir, len] : path) move_down(dir, len);
+        for (const auto &[dir, len] : path) go_down(dir, len);
     }
 
     operator rational() const { return {_l.first + _r.first, _l.second + _r.second}; }
@@ -43,21 +43,26 @@ template<class Int> struct sbt_node {
 
     static sbt_node lca(const sbt_node &a, const sbt_node &b) {
         const sbt_path &pa = a.path(), &pb = b.path();
-        const int k = min(pa.size(), pb.size());
+        const int k = int(min(pa.size(), pb.size()));
         sbt_node c;
         for (int i = 0; i < k; i++) {
             if (pa[i] == pb[i]) {
-                c.move_down(pa[i].first, pa[i].second);
+                c.go_down(pa[i].first, pa[i].second);
             } else {
                 if (pa[i].first == pb[i].first)
-                    c.move_down(pa[i].first, min(pa[i].second, pb[i].second));
+                    c.go_down(pa[i].first, min(pa[i].second, pb[i].second));
                 break;
             }
         }
         return c;
     }
+    static sbt_node dist(const sbt_node &a, const sbt_node &b) {
+        return a.depth() + b.depth() - 2 * lca(a, b).depth();
+    }
+    sbt_node lca(const sbt_node &other) const { return lca(*this, other); }
+    sbt_node dist(const sbt_node &other) const { return dist(*this, other); }
 
-    bool move_up(Int k) {
+    bool go_up(Int k) {
         if (k < 0 || depth() < k) return false;
         while (k) {
             auto &[dir, len] = _path.back();
@@ -74,7 +79,7 @@ template<class Int> struct sbt_node {
         }
         return true;
     }
-    void move_down(sbt_arc dir, Int k) {
+    void go_down(sbt_arc dir, Int k) {
         assert(k >= 0);
         if (k == 0) return;
         if (_path.size() && dir == _path.back().first) _path.back().second += k;

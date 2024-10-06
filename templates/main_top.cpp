@@ -1,12 +1,12 @@
 #ifdef READ_MAIN
 
-void solve() {
+fn solve() {
 
 }
 
-int main() {
+fn main() -> i32 {
     cin.tie(nullptr)->sync_with_stdio(false);
-    int t = 1;
+    i32 t = 1;
     cin >> t;
     while (t--) solve();
 }
@@ -28,12 +28,13 @@ template<class Con> inline int len(const Con &c) { return int(c.size()); }
 #define pb push_back
 #define eb emplace_back
 #define pp pop_back
+#define fn auto
 
 // clang-format off
-template<class... Ts> inline void read(Ts &&...args) { ((cin >> args), ...); }
-template<class... Ts> inline void print(Ts &&...args) { ((cout << args << " "), ...); }
-template<class... Ts> inline void println(Ts &&...args) { ((cout << args << " "), ...), cout << "\n"; }
-#define rd(ty, ...) ty __VA_ARGS__; read(__VA_ARGS__)
+template<class... Ts> inline fn read(Ts &&...args) { ((cin >> args), ...); }
+template<class... Ts> inline fn print(Ts &&...args) { ((cout << args << " "), ...); }
+template<class... Ts> inline fn println(Ts &&...args) { ((cout << args << " "), ...), cout << "\n"; }
+#define rd(ty, a...) ty a; read(a)
 // clang-format on
 
 #ifndef LOCAL

@@ -14,6 +14,6 @@ export DIR="$(dirname "$0")"
 
 # https://stackoverflow.com/a/44124618
 xargs -P 0 -I {} sh -c 'eval "$1"' - {} <<'EOF'
-watchexec --no-vcs-ignore -pe cpp $DIR/compile.sh
+watchexec --no-vcs-ignore -i="stress_test*/*" -pe cpp $DIR/compile.sh
 watchexec --no-vcs-ignore -pe inp $DIR/test.sh
 EOF
