@@ -9,7 +9,6 @@ template<class T> T rand(T l, T r) {
 
 void gen_test() {
     ofstream cout("a.inp");
-
     auto print = [&](auto &&...xs) { ((cout << xs << " "), ...); };
     [[maybe_unused]]
     auto println = [&](auto &&...xs) { print(xs...), cout << "\n"; };
