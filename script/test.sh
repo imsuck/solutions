@@ -5,9 +5,9 @@ echo "------------- Test -------------"
 tune="0.038"
 start=`date +%s.%N`
 if command -v systemd-run &>/dev/null; then
-  cat "a.inp" | systemd-run --scope -p MemoryMax=512M -q --user ./a.out
+  systemd-run --scope -p MemoryMax=512M -q --user ./a.out < a.inp
 else
-  cat "a.inp" | ./a.out
+  ./a.out < a.inp
 fi
 end=`date +%s.%N`
 dur=`echo "$end - $start - $tune" | bc`
