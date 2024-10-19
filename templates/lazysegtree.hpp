@@ -62,7 +62,7 @@ template<class M> struct LazySegTree {
   private:
     int n, lg = 0;
     vector<T> t;
-    vector<bool> upd;
+    vector<char> upd;
     vector<F> lz;
     void update(int p) { t[p] = M::op(t[p << 1], t[p << 1 | 1]); }
     void update_from(int p) {

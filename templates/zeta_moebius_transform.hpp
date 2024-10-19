@@ -3,7 +3,7 @@ using namespace std;
 
 template<class T> void multiple_fzt(vector<T> &a) {
     const int n = int(a.size());
-    vector<unsigned> sieve(n, true);
+    vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;
         for (int k = (n - 1) / p; k > 0; k--) {
@@ -14,7 +14,7 @@ template<class T> void multiple_fzt(vector<T> &a) {
 }
 template<class T> void multiple_fmt(vector<T> &a) {
     const int n = int(a.size());
-    vector<unsigned> sieve(n, true);
+    vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;
         for (int k = 1; k * p < n; k++) {
@@ -25,7 +25,7 @@ template<class T> void multiple_fmt(vector<T> &a) {
 }
 template<class T> void divisor_fzt(vector<T> &a) {
     const int n = int(a.size());
-    vector<unsigned> sieve(n, true);
+    vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;
         for (int k = 1; k * p < n; k++) {
@@ -36,7 +36,7 @@ template<class T> void divisor_fzt(vector<T> &a) {
 }
 template<class T> void divisor_fmt(vector<T> &a) {
     const int n = int(a.size());
-    vector<unsigned> sieve(n, true);
+    vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;
         for (int k = (n - 1) / p; k > 0; k--) {
