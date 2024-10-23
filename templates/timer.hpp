@@ -5,16 +5,14 @@ using namespace chrono;
 #if false
 struct Timer {
     string _msg;
-    time_point<steady_clock> start, end;
+    time_point<steady_clock> start = steady_clock::now(), end;
     void stop() { end = steady_clock::now(); }
     Timer() = default;
-    Timer(const string &msg) : _msg(msg), start(steady_clock::now()) {}
+    Timer(const string &msg) : _msg(msg + ": ") {}
     ~Timer() {
-        cerr << _msg + (_msg.empty() ? "" : ": ")
-             << (duration_cast<microseconds>(steady_clock::now() - start)
-                     .count() /
-                 1e6l)
-             << "s\n";
+    #ifdef LOCAL
+        stop(), cerr << _msg << (end - start) / 1ms << "ms\n";
+    #endif
     }
 };
 #endif
@@ -22,10 +20,10 @@ struct Timer {
 #if true
 template<class Fn> struct Timer {
     Fn fn;
-    time_point<steady_clock> end, start;
+    time_point<steady_clock> start = steady_clock::now(), end;
     bool done = false;
     void stop() { end = steady_clock::now(), done = true; }
-    Timer(Fn f) : fn(f), start(steady_clock::now()) {}
+    Timer(Fn f) : fn(f) {}
     void display() {
         stop();
     #ifdef LOCAL
@@ -35,8 +33,7 @@ template<class Fn> struct Timer {
     #ifdef LOCAL
     ~Timer() {
         end = max(steady_clock::now(), end);
-        if (done)
-            return;
+        if (done) return;
         fn(end - start), cout << flush;
     }
     #endif
