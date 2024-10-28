@@ -11,9 +11,6 @@ using u64 = uint64_t;
 using str = string;
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wc++17-extensions"
-
 template<ty T> struct streamable {
     template<ty TT>
     static auto test(int) -> decltype(declval<ostream &>() << declval<TT>(),
@@ -49,8 +46,8 @@ template<size_t N> str to_str(const bitset<N> &b) { return b.to_string(); }
 template<ty T, ty U> str to_str(const pair<T, U> &);
 template<ty T> str to_str(const vector<T> &);
 template<ty T, size_t N> str to_str(const array<T, N> &);
-template<ty T, enable_if_t<streamable_v<T>, int>> str to_str(const T &);
-template<ty T, enable_if_t<!streamable_v<T>, int>> str to_str(const T &);
+template<ty T, enable_if_t<streamable_v<T>, int>> str to_str(T &&);
+template<ty T, enable_if_t<!streamable_v<T>, int>> str to_str(T &&);
 
 template<size_t i = 0, class... Ts> string tup_str_helper(const tuple<Ts...> &t) {
     if constexpr (i == sizeof...(Ts)) return "";
@@ -66,26 +63,26 @@ template<ty T, ty U> str to_str(const pair<T, U> &p) {
 template<ty T> str to_str(const vector<T> &v) {
     i32 f = 0;
     str s = "[";
-    for (const auto &i : v) s += (f++ ? ", " : "") + to_str(i);
+    for (auto &&i : v) s += (f++ ? ", " : "") + to_str(i);
     s += "]";
     return s;
 }
 template<ty T, size_t N> str to_str(const array<T, N> &arr) {
     i32 f = 0;
     str s = "[";
-    for (const auto &i : arr) s += (f++ ? ", " : "") + to_str(i);
+    for (auto &&i : arr) s += (f++ ? ", " : "") + to_str(i);
     s += "]";
     return s;
 }
-template<ty T, enable_if_t<streamable_v<T>, int> = 1> str to_str(const T &x) {
+template<ty T, enable_if_t<streamable_v<T>, int> = 1> str to_str(T &&x) {
     stringstream ss;
     ss << x;
     return ss.str();
 }
-template<ty T, enable_if_t<!streamable_v<T>, int> = 1> str to_str(const T &x) {
+template<ty T, enable_if_t<!streamable_v<T>, int> = 1> str to_str(T &&x) {
     i32 f = 0;
     str s = "{";
-    for (const auto &i : x) s += (f++ ? ", " : "") + to_str(i);
+    for (auto &&i : x) s += (f++ ? ", " : "") + to_str(i);
     s += "}";
     return s;
 }
@@ -96,7 +93,7 @@ template<ty T, ty... U> str _fmt(T &&t, U &&...u) {
     return to_str(t) + (sizeof...(u) ? ", " : "") + _fmt(u...);
 }
 
-template<class T> void _print(const str &func, const str &vars, int line, const T &x) {
+template<class T> void _print(const str &func, const str &vars, int line, T &&x) {
     cerr << "[\e[33m" << func << "\e[0m:" << line << "] ";
     cerr << vars << " = " << to_str(x) << "\n";
 }
@@ -113,5 +110,3 @@ _print(const str &func, const str &vars, int line, Args &&...args) {
 
 #undef ty
 #undef to_str
-
-#pragma GCC diagnostic pop

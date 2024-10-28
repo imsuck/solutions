@@ -27,5 +27,5 @@ tuple<vector<int>, vector<int>, vector<int>> centroid_decomp(const G &g) {
     };
 
     decomp(decomp, 0, 0, -1);
-    return {lvl, sz_comp, par};
+    return {move(lvl), move(sz_comp), move(par)};
 }

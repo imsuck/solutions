@@ -8,3 +8,4 @@ stress_testing/tester
 stress_testing/a.inp
 stress_testing/a.output
 stress_testing/a.ans
+lib/debug.h.gch

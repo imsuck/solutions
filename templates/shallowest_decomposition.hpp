@@ -3,13 +3,12 @@
 using namespace std;
 
 // clang-format off
-template<class Graph>
-pair<Graph, int> shallowest_decomp(const Graph &g, int root = 0) {
+template<class G> pair<G, int> shallowest_decomp(const G &g) {
     auto clz = [](uint32_t x) { return x ? __builtin_clz(x) : 32; };
     auto ctz = [](uint32_t x) { return x ? __builtin_ctz(x) : 32; };
     auto bw = [&](uint32_t x) { return clz(0) - clz(x); };
     const int n = int(g.size());
-    Graph tree(n), st(bw(n));
+    G tree(n), st(bw(n));
 
     auto chain = [&](int labels, int v) {
         while (labels) {
@@ -37,10 +36,10 @@ pair<Graph, int> shallowest_decomp(const Graph &g, int root = 0) {
             chain((forbid[c] + 1) & ((1 << label) - 1), v);
         }
     };
-    dfs(dfs, root);
-    int mx = __lg(forbid[root] + 1);
-    int nroot = st[mx].back(); st[mx].pop_back();
-    chain((forbid[root] + 1) & ((1 << mx) - 1), nroot);
-    return {move(tree), nroot};
+    dfs(dfs, 0);
+    int mx = __lg(forbid[0] + 1);
+    int root = st[mx].back(); st[mx].pop_back();
+    chain((forbid[0] + 1) & ((1 << mx) - 1), root);
+    return {move(tree), root};
 }
 // clang-format on
