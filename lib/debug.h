@@ -20,6 +20,14 @@ template<ty T> struct streamable {
     static constexpr bool value = decltype(test<T>(0))::value;
 };
 template<ty T> constexpr bool streamable_v = streamable<T>::value;
+template<ty T> struct iterable {
+    template<ty TT>
+    static auto test(int) -> decltype(declval<TT>().begin(), true_type());
+    template<ty> static auto test(...) -> false_type;
+
+    static constexpr auto value = decltype(test<T>(0))::value;
+};
+template<ty T> constexpr bool iterable_v = iterable<T>::value;
 
 #ifdef __SIZEOF_INT128__
 using i128 = __int128_t;
@@ -47,7 +55,7 @@ template<ty T, ty U> str to_str(const pair<T, U> &);
 template<ty T> str to_str(const vector<T> &);
 template<ty T, size_t N> str to_str(const array<T, N> &);
 template<ty T, enable_if_t<streamable_v<T>, int>> str to_str(T &&);
-template<ty T, enable_if_t<!streamable_v<T>, int>> str to_str(T &&);
+template<ty T, enable_if_t<iterable_v<T>, int>> str to_str(T &&);
 
 template<size_t i = 0, class... Ts> string tup_str_helper(const tuple<Ts...> &t) {
     if constexpr (i == sizeof...(Ts)) return "";
@@ -79,7 +87,7 @@ template<ty T, enable_if_t<streamable_v<T>, int> = 1> str to_str(T &&x) {
     ss << x;
     return ss.str();
 }
-template<ty T, enable_if_t<!streamable_v<T>, int> = 1> str to_str(T &&x) {
+template<ty T, enable_if_t<iterable_v<T>, int> = 1> str to_str(T &&x) {
     i32 f = 0;
     str s = "{";
     for (auto &&i : x) s += (f++ ? ", " : "") + to_str(i);

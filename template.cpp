@@ -14,10 +14,9 @@ using f32 = float;
 using f64 = double;
 using f80 = long double;
 using str = string;
-#define len() size()
-#define vec vector
+template<class T> using vec = vector<T>;
+template<class T> int len(T &&x) { return int(x.size()); }
 #define all(a) begin(a), end(a)
-#define rall(a) rbegin(a), rend(a)
 #define pb push_back
 #define pp pop_back
 #define eb emplace_back
