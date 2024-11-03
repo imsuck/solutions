@@ -1,9 +1,9 @@
 struct subsets {
     subsets(int m) : s(m), mask(m) {}
 
-    subsets begin() { return *this; }
-    subsets end() { return {0}; }
-    bool operator!=(subsets) { return s != -1; }
+    subsets begin() const { return *this; }
+    subsets end() const { return {0}; }
+    bool operator!=(subsets) const { return s != -1; }
     void operator++() { s--; }
     int operator*() { return s &= mask; }
 
