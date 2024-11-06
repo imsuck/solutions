@@ -1,39 +1,60 @@
 #pragma once
-#include <bitset>
-using namespace std;
 
-#ifdef __SIZEOF_INT128__
-using i128 = __int128_t;
-using u128 = __uint128_t;
-str to_str(i128 x) {
-    str s = "";
-    if (x < 0) s += "-", x = -x;
-    if (x > 9) s += to_str(x / 10);
-    s.push_back(char(x % 10) + '0');
-    return s;
-}
-str to_str(u128 x) {
-    str s = "";
-    if (x > 9) s += to_str(x / 10);
-    s.push_back(char(x % 10) + '0');
-    return s;
-}
-#endif
-str to_str(bool b) { return b ? "true" : "false"; }
-str to_str(char c) { return "'" + str(1, c) + "'"; }
-str to_str(const str &s) { return '"' + s + '"'; }
-template<size_t N> str to_str(const bitset<N> &b) { return b.to_string(); }
+#include "info_fwd.hpp"
+#include "type_check.hpp"
+#include <algorithm>
+#include <sstream>
+#include <string>
 
-// tuples, pairs
-template<size_t i = 0, ty... Ts>
-string tup_str_helper(const tuple<Ts...> &t) {
-    if constexpr (i == sizeof...(Ts)) return "";
-    else return (i ? ", " : "") + to_string(get<i>(t)) +
-               tup_str_helper<i + 1>(t);
-}
-template<ty... Ts> str to_str(const tuple<Ts...> &tup) {
-    return "(" + tup_str_helper(tup) + ")";
-}
-template<ty T, ty U> str to_str(const pair<T, U> &p) {
-    return "(" + to_str(p.first) + ", " + to_str(p.second) + ")";
-}
+namespace dbg {
+    using namespace std;
+    namespace _detail {
+        template<typename T,
+                 enable_if_t<!is_floating_point_v<remove_cvref_t<T>>, int> = 1>
+        inline string dbg_arithmetic(T n) {
+            const bool neg = n < 0;
+            if (neg) n = -n;
+            string output;
+            while (n != 0) {
+                output += char(n % 10 + '0');
+                n /= 10;
+            }
+            if (neg) output += '-';
+            reverse(output.begin(), output.end());
+            if (output.empty()) output = "0";
+            return output;
+        }
+        template<typename T,
+                 enable_if_t<is_floating_point_v<remove_cvref_t<T>>, int> = 1>
+        inline string dbg_arithmetic(T x) {
+            return to_string(x);
+        }
+        inline string dbg_bool(bool b) { return b ? "true" : "false"; }
+        inline string dbg_char(char c) { return "'" + string(1, c) + "'"; }
+
+        template<typename T, enable_if_t<is_string<T>, int> = 1>
+        inline string dbg_string(T str) {
+            return '"' + string(str) + '"';
+        }
+
+        template<typename T, typename U>
+        inline string dbg_pair(const pair<T, U> &p) {
+            return "(" + dbg_info(p.first) + ", " + dbg_info(p.second) + ")";
+        }
+
+        template<typename... Ts, size_t idx = 0>
+        inline string dbg_tuple_helper(const tuple<Ts...> &t) {
+            return "";
+        }
+        template<typename... Ts>
+        inline string dbg_tuple(const tuple<Ts...> &t) {
+            return "(" + dbg_tuple_helper<Ts...>(t) + ")";
+        }
+
+        template<typename T> inline string dbg_streamable(T &&x) {
+            stringstream ss;
+            ss << x;
+            return ss.str();
+        }
+    } // namespace _detail
+} // namespace dbg

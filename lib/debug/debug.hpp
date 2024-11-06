@@ -1,58 +1,49 @@
-#include <cstdint>
+#pragma once
+
 #include <iostream>
 #include <string>
-using namespace std;
-
-#define ty typename
-#define to_str to_string
-
-using i32 = int32_t;
-using u32 = uint32_t;
-using i64 = int64_t;
-using u64 = uint64_t;
-using str = string;
 
 namespace dbg {
-    static int indent_lvl = 0;
-    str get_indent() { return str(2 * indent_lvl, ' '); }
-    struct inc_indent {
-        bool on;
-        inc_indent(bool b) : on(b) { indent_lvl += on; }
-        ~inc_indent() { indent_lvl -= on; }
-    };
-} // namespace dbg
+    using namespace std;
 
-#include "macros.hpp"
-#include "type_check.hpp"
-
-#include "forward_decl.hpp"
-
-#include "containers.hpp"
-#include "trivial.hpp"
-
-namespace dbg {
-    inline str _fmt() { return ""; }
-    template<ty T, ty... U> str _fmt(T &&t, U &&...u) {
-        return to_str(t) + (sizeof...(u) ? ", " : "") + _fmt(u...);
-    }
-
-    template<ty T>
-    void _print(const str &func, const str &vars, int line, T &&x) {
-        cerr << "[\e[33m" << func << "\e[0m:" << line << "] ";
-        cerr << vars << " = " << to_str(x) << "\n";
-    }
-    template<ty... Args>
-    enable_if_t<sizeof...(Args) != 1> _print(const str &func, const str &vars,
-                                             int line, Args &&...args) {
-        cerr << "[\e[33m" << func << "\e[0m:" << line << "] ";
-        cerr << "[" << vars << "]";
-        cerr << " = ";
-        cerr << "[" << _fmt(args...) << "]\n";
-    }
+    inline int indent_lvl = 0;
+    inline string get_indent() { return string(2 * indent_lvl, ' '); }
 }
 
-#define dbg(a...) dbg::_print(__func__, #a, __LINE__, a)
-#define mark_dbg()
+#include "info.hpp"
 
-#undef ty
-#undef to_str
+namespace dbg {
+    namespace _detail {
+        struct src_loc {
+            string file_name;
+            int line;
+            string func_name;
+        };
+
+        template<typename...> string fmt() { return ""; }
+        template<typename T, typename... Args>
+        string fmt(T &&x, Args &&...args) {
+            return dbg_info(x) + (sizeof...(args) ? ", " + fmt(args...) : "");
+        }
+    }; // namespace _detail
+
+    template<typename... Args>
+    void dbg_impl(_detail::src_loc loc, string args_str, Args &&...args) {
+        const bool multi_arg = sizeof...(args) > 1;
+        const string label =
+            "[\e[33m" + loc.func_name + "\e[0m:" + to_string(loc.line) + "]";
+
+        string vals = _detail::fmt(args...);
+
+        if (multi_arg) {
+            args_str = "[" + args_str + "]";
+            vals = "[" + vals + "]";
+        }
+
+        const string output = label + " " + args_str + " = " + vals;
+        cerr << output << "\n";
+    }
+} // namespace dbg
+
+#define dbg(a...) dbg::dbg_impl({__FILE__, __LINE__, __func__}, #a, a)
+#define mark_dbg()

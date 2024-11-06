@@ -1,79 +1,73 @@
 #pragma once
-#include <array>
-#include <sstream>
-#include <vector>
-using namespace std;
 
-template<ty T> str to_str(const vector<T> &);
-template<ty T, size_t N> str to_str(const array<T, N> &);
-template<ty T, enable_if_t<dbg_internal::streamable_v<T>, int>>
-str to_str(T &&);
-template<ty T, enable_if_t<dbg_internal::iterable_v<T>, int>> str to_str(T &&);
+#include "info_fwd.hpp"
+#include "type_check.hpp"
 
-template<ty T> str to_str(const vector<T> &v) {
-    constexpr bool trivial_val = dbg_internal::_trivial<T>;
-    i32 f = 0;
-    str s;
-    {
-        dbg::inc_indent _indt(!trivial_val);
-        s = (trivial_val ? "[" : "[\n" + dbg::get_indent());
-        for (auto &&i : v) {
-            if (f++) {
-                if constexpr (trivial_val) s += ", ";
-                else s += ",\n" + dbg::get_indent();
+namespace dbg {
+    using namespace std;
+
+    extern int indent_lvl;
+    extern string get_indent();
+
+    namespace _detail {
+        template<typename T>
+        inline string dbg_iterable(T &&a, string open, string close) {
+            indent_lvl++;
+            const bool trivial_value =
+                _detail::is_trivial_v<decltype(*a.begin())>;
+            const string sep = trivial_value ? ", " : ",\n" + get_indent();
+
+            vector<string> vals;
+            for (auto &elem : a) vals.push_back(dbg_info(elem));
+
+            string output = open + (trivial_value ? "" : "\n" + get_indent());
+            bool first_elem = true;
+            for (string &val : vals) {
+                if (first_elem) {
+                    output += val;
+                    first_elem = false;
+                } else {
+                    output += sep + val;
+                }
             }
-            s += to_str(i);
+            indent_lvl--;
+            output += (trivial_value ? "" : "\n" + get_indent()) + close;
+            return output;
         }
-    }
-    s += (trivial_val ? "]" : "\n" + dbg::get_indent() + "]");
-    return s;
-}
-template<ty T, size_t N> str to_str(const array<T, N> &arr) {
-    constexpr bool trivial_val = dbg_internal::_trivial<T>;
-    i32 f = 0;
-    str s;
-    {
-        dbg::inc_indent _indt(!trivial_val);
-        s = (trivial_val ? "[" : "[\n" + dbg::get_indent());
-        for (auto &&i : arr) {
-            if (f++) {
-                if constexpr (trivial_val) s += ", ";
-                else s += ",\n" + dbg::get_indent();
+
+        template<typename T> inline string dbg_map(T &&mp) {
+            indent_lvl++;
+            const string sep = "\n" + get_indent();
+            vector<string> vals;
+            for (auto &[key, val] : mp)
+                vals.push_back(dbg_info(key) + " -> " + dbg_info(val));
+
+            string output = "{\n" + get_indent();
+            bool first_elem = true;
+            for (string &val : vals) {
+                if (first_elem) {
+                    output += val;
+                    first_elem = false;
+                } else {
+                    output += sep + val;
+                }
             }
-            s += to_str(i);
+            indent_lvl--;
+            output += "\n" + get_indent() + "}";
+            return output;
         }
-    }
-    s += (trivial_val ? "]" : "\n" + dbg::get_indent() + "]");
-    return s;
-}
-template<ty T, enable_if_t<dbg_internal::streamable_v<T> &&
-                               !is_same_v<decay_t<T>, basic_string<char>>,
-                           int> = 1>
-str to_str(T &&x) {
-    stringstream ss;
-    ss << x;
-    return ss.str();
-}
-template<ty T, ty _T = decay_t<T>,
-         enable_if_t<dbg_internal::iterable_v<_T> &&
-                         !dbg_internal::is_vector_v<_T> &&
-                         !is_same_v<_T, basic_string<char>>,
-                     int> = 1>
-str to_str(T &&x) {
-    constexpr bool trivial_val = dbg_internal::_trivial<decltype(*x.begin())>;
-    i32 f = 0;
-    str s;
-    {
-        dbg::inc_indent _indt(!trivial_val);
-        s = (trivial_val ? "{" : "{\n" + dbg::get_indent());
-        for (auto &&i : x) {
-            if (f++) {
-                if constexpr (trivial_val) s += ", ";
-                else s += ",\n" + dbg::get_indent();
-            }
-            s += to_str(i);
+
+        template<typename T>
+        inline string dbg_stack(T st) { // works with priority_queue too
+            vector<typename T::value_type> v;
+            while (!st.empty()) v.push_back(st.top()), st.pop();
+            return dbg_iterable(v, "{", "}");
         }
-    }
-    s += (trivial_val ? "}" : "\n" + dbg::get_indent() + "}");
-    return s;
-}
+        template<typename T, typename... Args>
+        inline string dbg_queue(queue<T, Args...> q) {
+            vector<T> v;
+            while (!q.empty()) v.push_back(q.front()), q.pop();
+            return dbg_iterable(v, "{", "}");
+        }
+    } // namespace _detail
+} // namespace dbg
