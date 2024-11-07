@@ -18,7 +18,7 @@ namespace dbg {
             const string sep = trivial_value ? ", " : ",\n" + get_indent();
 
             vector<string> vals;
-            for (auto &elem : a) vals.push_back(dbg_info(elem));
+            for (auto &&elem : a) vals.push_back(dbg_info(elem));
 
             string output = open + (trivial_value ? "" : "\n" + get_indent());
             bool first_elem = true;
@@ -39,7 +39,7 @@ namespace dbg {
             indent_lvl++;
             const string sep = "\n" + get_indent();
             vector<string> vals;
-            for (auto &[key, val] : mp)
+            for (auto &&[key, val] : mp)
                 vals.push_back(dbg_info(key) + " -> " + dbg_info(val));
 
             string output = "{\n" + get_indent();

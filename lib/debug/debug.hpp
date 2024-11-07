@@ -8,7 +8,7 @@ namespace dbg {
 
     inline int indent_lvl = 0;
     inline string get_indent() { return string(2 * indent_lvl, ' '); }
-}
+} // namespace dbg
 
 #include "info.hpp"
 

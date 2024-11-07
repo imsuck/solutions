@@ -24,7 +24,7 @@ template<class T> struct crev_t {
 };
 template<class T> rev_t<T> rev(T &a) { return {a}; }
 template<class T> crev_t<T> rev(const T &a) { return {a}; }
-template<class T> struct range {
+template<class T = int> struct range {
     range() {}
     range(T _stop) : stop(_stop) {}
     range(T _start, T _stop, T _step = 1)
