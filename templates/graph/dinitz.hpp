@@ -22,7 +22,7 @@ template<class T> struct Dinitz {
     }
 
   private:
-    T FLOW_INF = numeric_limits<T>::max() / 2;
+    static constexpr T FLOW_INF = numeric_limits<T>::max() / 2;
 
     struct Edge {
         int to, rev;
