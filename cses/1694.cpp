@@ -1,18 +1,15 @@
-#include <limits>
-#include <queue>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
 // clang-format off
 template<class T> struct Dinitz {
-    Dinitz() {}
     Dinitz(int n) : g(n), lvl(n), iter(n) {}
-
+ 
     void add_edge(int u, int v, T cap, T rcap = 0) {
         g[u].push_back({v, int(g[v].size()), cap});
         g[v].push_back({u, int(g[u].size() - 1), rcap});
     }
-
+ 
     T max_flow(int s, int t) {
         T flow = 0;
         while (build_dag(s, t)) {
@@ -21,17 +18,18 @@ template<class T> struct Dinitz {
         }
         return flow;
     }
-
+ 
   private:
     static constexpr T FLOW_INF = numeric_limits<T>::max() / 2;
+ 
     struct Edge {
         int to, rev;
         T cap;
     };
-
+ 
     vector<vector<Edge>> g;
     vector<int> lvl, iter;
-
+ 
     bool build_dag(int s, int t) {
         fill(begin(lvl), end(lvl), -1);
         lvl[s] = 0;
@@ -62,3 +60,18 @@ template<class T> struct Dinitz {
     }
 };
 // clang-format on
+
+int main() {
+    cin.tie(nullptr)->sync_with_stdio(false);
+    int n, m;
+    cin >> n >> m;
+    Dinitz<int64_t> g(n);
+
+    while (m--) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        g.add_edge(a - 1, b - 1, c);
+    }
+
+    cout << g.max_flow(0, n - 1) << "\n";
+}

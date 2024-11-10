@@ -29,7 +29,7 @@ template<class M> struct Rerooting {
     vector<T> dp_sub, dp_all;
 
     void dfs_sub(int v, int p) {
-        for (const auto &[c, cost] : g[v]) {
+        for (auto &[c, cost] : g[v]) {
             if (c == p) continue;
             dfs_sub(c, v);
             dp_sub[v] = M::op(dp_sub[v], apply_edge(dp_sub[c], v, c, cost));
@@ -38,7 +38,7 @@ template<class M> struct Rerooting {
     }
     void dfs_all(int v, int p, const T &val) {
         vector ds = {val};
-        for (const auto &[c, cost] : g[v]) {
+        for (auto &[c, cost] : g[v]) {
             if (c == p) continue;
             ds.push_back(apply_edge(dp_sub[c], v, c, cost));
         }
@@ -48,7 +48,7 @@ template<class M> struct Rerooting {
         for (int i = n; i--;) tail[i] = M::op(ds[i], tail[i + 1]);
         dp_all[v] = apply_vertex(head[n], v);
         int k = 1;
-        for (const auto &[c, cost] : g[v]) {
+        for (auto &[c, cost] : g[v]) {
             if (c == p) continue;
             dfs_all(c, v,
                     apply_edge(apply_vertex(M::op(head[k], tail[k + 1]), v), c,

@@ -3,7 +3,6 @@
 using namespace std;
 
 // Modified version of atcoder library's segtree.hpp
-// clang-format off
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 template<class M> struct SegTree {
@@ -41,4 +40,3 @@ template<class M> struct SegTree {
     void update(int p) { t[p] = M::op(t[p << 1], t[p << 1 | 1]); }
 };
 #pragma GCC diagnostic pop
-// clang-format on
