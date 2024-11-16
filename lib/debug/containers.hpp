@@ -1,6 +1,7 @@
 #pragma once
 
 #include "info_fwd.hpp"
+#include "iterator.hpp"
 #include "type_check.hpp"
 
 namespace dbg {
@@ -14,7 +15,7 @@ namespace dbg {
         inline string dbg_iterable(T &&a, string open, string close) {
             indent_lvl++;
             const bool trivial_value =
-                _detail::is_trivial_v<decltype(*a.begin())>;
+                _detail::is_trivial_v<decltype(*iter_begin(a))>;
             const string sep = trivial_value ? ", " : ",\n" + get_indent();
 
             vector<string> vals;

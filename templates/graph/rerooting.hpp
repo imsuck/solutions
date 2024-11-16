@@ -14,8 +14,8 @@ template<class M> struct Rerooting {
         g[v].emplace_back(u, c);
     }
 
-    template<class F, class G> vector<T> run(F &&_f, G &&_g) {
-        apply_edge = _f, apply_vertex = _g;
+    template<class F1, class F2> vector<T> run(F1 &&f1, F2 &&f2) {
+        apply_edge = f1, apply_vertex = f2;
         dp_sub.assign(g.size(), M::id()), dp_all.resize(g.size());
         dfs_sub(0, -1);
         dfs_all(0, -1, M::id());

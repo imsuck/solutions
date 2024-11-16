@@ -13,11 +13,12 @@ namespace dbg {
                  enable_if_t<!is_floating_point_v<remove_cvref_t<T>>, int> = 1>
         inline string dbg_arithmetic(T n) {
             const bool neg = n < 0;
-            if (neg) n = -n;
+            make_unsigned_t<remove_cvref_t<T>> x = n;
+            if (neg) x = -x;
             string output;
-            while (n != 0) {
-                output += char(n % 10 + '0');
-                n /= 10;
+            while (x != 0) {
+                output += char(x % 10 + '0');
+                x /= 10;
             }
             if (neg) output += '-';
             reverse(output.begin(), output.end());

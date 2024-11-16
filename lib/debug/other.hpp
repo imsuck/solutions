@@ -14,7 +14,7 @@ namespace dbg {
 #if defined(__GNUC__) && !defined(__llvm__)
             return string_view{fn_name.data() + 51, fn_name.size() - 52};
 #elif defined(__llvm__)
-            return string_view{fn_name.data() + 22, fn_name.size() - 23};
+            return string_view{fn_name.data() + 36, fn_name.size() - 37};
 #endif
         }
         template<typename T> constexpr auto type_of(T &&x) {

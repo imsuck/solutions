@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "iterator.hpp"
 #include "options.hpp"
 
 namespace dbg {
@@ -144,7 +145,7 @@ namespace dbg {
         // Iterable ------------------------------------------------------------
         template<typename T> struct iterable {
             template<typename TT>
-            static auto test(int) -> decltype(declval<TT>().begin(),
+            static auto test(int) -> decltype(iter_begin(declval<TT>()),
                                               true_type());
             template<typename TT> static auto test(...) -> false_type;
 

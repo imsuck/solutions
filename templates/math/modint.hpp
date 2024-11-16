@@ -16,7 +16,7 @@ template<uint32_t m> struct modint {
     static constexpr uint32_t mod() noexcept { return m; }
     constexpr modint() noexcept = default;
     constexpr modint(int64_t v) noexcept : _v((v %= m) < 0 ? v + m : v) {}
-    constexpr static mint raw(uint32_t v) noexcept { mint x; return x._v, x; }
+    constexpr static mint raw(uint32_t v) noexcept { mint x; return x._v = v, x; }
     template<class T> constexpr explicit operator T() const noexcept { return _v; }
 
     constexpr mint &operator++() noexcept {
