@@ -1,29 +1,44 @@
+#include <cassert>
 #include <vector>
 using namespace std;
 
+// clang-format off
 struct XorTree {
-    XorTree(int _n) : n(_n), adj(n), deg(n) {}
+    XorTree() {}
+    XorTree(int _n) : n(_n), par(n), deg(n) {}
 
     void add_edge(int u, int v) {
-        adj[u] ^= v, adj[v] ^= u, deg[u]++, deg[v]++;
+        par[u] ^= v, par[v] ^= u, deg[u]++, deg[v]++;
     }
-    void set_root(int v) { deg[v] = -1; }
+    void set_root(int v) { root = v, deg[v] = -1; }
 
     template<class F1, class F2> void run(F1 &&apply_edge, F2 &&apply_vertex) {
-        int cnt = n;
+        assert(root != -1 && "no root set");
         for (int i = 0; i < n; i++) {
             int v = i;
-            while (deg[v] == 1) {
-                int p = adj[v];
-                deg[v]--, deg[p]--, adj[p] ^= v;
-                apply_vertex(v), cnt--, apply_edge(p, v);
-                v = p;
+            for (int p; deg[v] == 1; v = p) {
+                p = par[v];
+                deg[v]--, deg[p]--, par[p] ^= v;
+                apply_vertex(v), apply_edge(p, v);
             }
-            if (deg[v] == 0 || cnt == 1) apply_vertex(v);
         }
+        apply_vertex(root);
+    }
+    auto dfs_ord() {
+        int id = n;
+        vector<int> sz(n, 1), ord(n);
+        run([&](int v, int c) { sz[v] += sz[c]; },
+            [&](int v) { ord[--id] = v; });
+        for (int i = 1; i < n; i++) {
+            int v = ord[i], p = par[v];
+            tie(sz[v], sz[p]) = make_pair(sz[p], sz[p] - sz[v]);
+        }
+        for (int i = 0; i < n; i++) ord[--sz[i]] = i;
+        return make_pair(ord, sz);
     }
 
-  private:
-    int n;
-    vector<int> adj, deg;
+  private: int n, root = -1;
+  public:  vector<int> par;
+  private: vector<int> deg;
 };
+// clang-format on
