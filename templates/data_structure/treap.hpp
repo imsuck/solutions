@@ -44,23 +44,23 @@ template<class M> struct Treap {
     T prod(int l, int r) { return (*this)(l, r); }
     T all_prod() const { return prd(root); }
 
-    void push_front(const T &x) { root = merge(new Node(x), root); }
-    void push_back(const T &x) { root = merge(root, new Node(x)); }
+    void push_front(const T &x) { root = merge(new node(x), root); }
+    void push_back(const T &x) { root = merge(root, new node(x)); }
     void pop_front() { root = split(root, 1).second; }
     void pop_back() { root = split(root, size() - 1).first; }
 
   private:
-    struct Node;
-    using node_ptr = Node *;
+    struct node;
+    using node_ptr = node *;
     using cptr = const node_ptr &;
-    struct Node : st_alloc<Node> {
+    struct node : st_alloc<node> {
         node_ptr l = nullptr, r = nullptr;
         T val = M::id(), prod = M::id();
         uint64_t pr = rng();
         int sz = 1;
         bool rev = false;
-        Node() {}
-        Node(const T &x) : val(x), prod(x) {}
+        node() {}
+        node(const T &x) : val(x), prod(x) {}
         static uint64_t rng() {
             static mt19937 mt(uint64_t(+[](){}));
             return mt();
