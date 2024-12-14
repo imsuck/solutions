@@ -30,8 +30,8 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; cnt == -1 || i <= cnt; i++) {
         gen_test();
-        system("./a.out");
-        system("./safe.out");
+        system("./a.out <a.inp >a.output");
+        system("./safe.out <a.inp >a.ans");
 
         this_thread::sleep_for(20ms); // wait for files to finish writing
         if (system("diff a.output a.ans") != 0) {

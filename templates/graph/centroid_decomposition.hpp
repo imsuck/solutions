@@ -18,12 +18,12 @@ tuple<vector<int>, vector<int>, vector<int>> centroid_decomp(const G &g) {
                 return dfs(dfs, c, v, n);
         return v;
     };
-    auto decomp = [&](auto &dfs, int v, int k, int p) -> void {
+    auto decomp = [&](auto &dfs, int v, int l, int p) -> void {
         int n = dfs_sz(dfs_sz, v, -1);
         int s = dfs_cent(dfs_cent, v, -1, n);
-        lvl[s] = k, sz_comp[s] = n, par[s] = p;
+        lvl[s] = l, sz_comp[s] = n, par[s] = p;
         for (int c : g[s])
-            if (lvl[c] == -1) dfs(dfs, c, k + 1, s);
+            if (lvl[c] == -1) dfs(dfs, c, l + 1, s);
     };
 
     decomp(decomp, 0, 0, -1);

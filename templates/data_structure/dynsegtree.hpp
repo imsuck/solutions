@@ -6,7 +6,7 @@ template<class> struct st_alloc;
 template<class M, class I = int> struct DynSegTree {
     using T = typename M::T;
     DynSegTree() = default;
-    DynSegTree(int _n) : n(_n), root(new Node()) {}
+    DynSegTree(int _n) : n(_n), root(new node()) {}
 
     void set(I p, const T &x) {
         assert(0 <= p && p < n);
@@ -46,14 +46,14 @@ template<class M, class I = int> struct DynSegTree {
     T all_prod() const { return root->val; }
 
   private:
-    struct Node;
-    using node_ptr = Node *;
-    struct Node : st_alloc<Node> {
+    struct node;
+    using node_ptr = node *;
+    struct node : st_alloc<node> {
         T val = M::id();
         node_ptr l = nullptr, r = nullptr;
-        Node() {}
+        node() {}
         inline node_ptr c(bool z) {
-            return !z ? l ? l : l = new Node() : r ? r : r = new Node();
+            return !z ? l ? l : l = new node() : r ? r : r = new node();
         }
     };
 

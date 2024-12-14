@@ -46,4 +46,4 @@ namespace dbg {
 } // namespace dbg
 
 #define dbg(a...) dbg::dbg_impl({__FILE__, __LINE__, __func__}, #a, a)
-#define mark_dbg()
+#define debug()

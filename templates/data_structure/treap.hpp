@@ -52,7 +52,6 @@ template<class M> struct Treap {
   private:
     struct node;
     using node_ptr = node *;
-    using cptr = const node_ptr &;
     struct node : st_alloc<node> {
         node_ptr l = nullptr, r = nullptr;
         T val = M::id(), prod = M::id();
@@ -68,11 +67,11 @@ template<class M> struct Treap {
     };
 
     node_ptr root = nullptr;
-    explicit Treap(cptr t) : root(t) {}
+    explicit Treap(node_ptr t) : root(t) {}
 
-    static int sz(cptr t) { return t ? t->sz : 0; }
-    static T prd(cptr t) { return t ? t->prod : M::id(); }
-    static void push(cptr t) {
+    static int sz(node_ptr t) { return t ? t->sz : 0; }
+    static T prd(node_ptr t) { return t ? t->prod : M::id(); }
+    static void push(node_ptr t) {
         if (t->rev) {
             swap(t->l, t->r);
             if (t->l) t->l->rev ^= true;
@@ -85,7 +84,7 @@ template<class M> struct Treap {
         t->prod = M::op(M::op(prd(t->l), t->val), prd(t->r));
         return t;
     }
-    static node_ptr merge(cptr l, cptr r) {
+    static node_ptr merge(node_ptr l, node_ptr r) {
         if (!l || !r) return l ? l : r;
         push(l), push(r);
         if (l->pr < r->pr) {
@@ -96,7 +95,7 @@ template<class M> struct Treap {
             return pull(l);
         }
     }
-    static pair<node_ptr, node_ptr> split(cptr t, int k) {
+    static pair<node_ptr, node_ptr> split(node_ptr t, int k) {
         if (!t) return {nullptr, nullptr};
         push(t);
         int w = sz(t->l);
@@ -110,10 +109,10 @@ template<class M> struct Treap {
             return {pull(t), s.second};
         }
     }
-    static node_ptr merge(cptr a, cptr b, cptr c) {
+    static node_ptr merge(node_ptr a, node_ptr b, node_ptr c) {
         return merge(merge(a, b), c);
     }
-    static tuple<node_ptr, node_ptr, node_ptr> split(cptr t, int l, int r) {
+    static tuple<node_ptr, node_ptr, node_ptr> split(node_ptr t, int l, int r) {
         node_ptr a, b, c;
         tie(a, b) = split(t, l);
         tie(b, c) = split(b, r - l);

@@ -9,9 +9,9 @@ template<class> struct st_alloc;
 // NOTE: The copy constructor only copies the pointer. Becareful when doing
 // `ordered_set<> s2 = s1;`
 namespace bst {
-    template<class T> struct bst_node_base : st_alloc<T> {
-        using node_ptr = T *;
-        node_ptr left = nullptr, right = nullptr;
+    template<class T> struct bst_node : st_alloc<T> {
+        using ptr = T *;
+        ptr left = nullptr, right = nullptr;
         int sz = 1;
 
         void pull() {
@@ -21,9 +21,9 @@ namespace bst {
     template<class T> int size(const T &t) { return t ? t->sz : 0; }
 
     template<class T, class Cmp>
-    struct treap_node : bst_node_base<treap_node<T, Cmp>> {
-        using Base = bst_node_base<treap_node<T, Cmp>>;
-        using node_ptr = typename Base::node_ptr;
+    struct treap_node : bst_node<treap_node<T, Cmp>> {
+        using base = bst_node<treap_node<T, Cmp>>;
+        using ptr = typename base::node_ptr;
 
         treap_node() {}
         treap_node(const T &v) : val(v) {}
@@ -38,7 +38,7 @@ namespace bst {
             return mt();
         }
 
-        static node_ptr merge(const node_ptr &l, const node_ptr &r) {
+        static ptr merge(const ptr &l, const ptr &r) {
             if (!l) return r;
             if (!r) return l;
             if (l->pr > r->pr) {
@@ -49,7 +49,7 @@ namespace bst {
                 return r;
             }
         }
-        static pair<node_ptr, node_ptr> split(const node_ptr &t, const T &k,
+        static pair<ptr, ptr> split(const ptr &t, const T &k,
                                               bool include) {
             if (!t) return {nullptr, nullptr};
             if (cmp(t->val, k) || (t->val == k && include)) {
@@ -63,13 +63,11 @@ namespace bst {
             }
         }
     };
-    template<class T, class Cmp>
-    using treap_ptr = typename treap_node<T, Cmp>::node_ptr;
 } // namespace bst
 
 template<class T, class Cmp = less<>> struct ordered_set {
     using treap_node = bst::treap_node<T, Cmp>;
-    using treap_ptr = bst::treap_ptr<T, Cmp>;
+    using treap_ptr = treap_node *;
 
     ordered_set() {}
 
