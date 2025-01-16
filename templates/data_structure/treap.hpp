@@ -2,7 +2,7 @@
 #include <utility>
 using namespace std;
 
-template<class> struct st_alloc;
+#include "../other/st_alloc.hpp"
 
 template<class M> struct Treap {
     using T = typename M::T;

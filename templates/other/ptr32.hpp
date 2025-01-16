@@ -1,7 +1,8 @@
+#include <deque>
 #include <vector>
 using namespace std;
 
-template<class T> struct ptr32 {
+template<class T, bool auto_resize = true> struct ptr32 {
     ptr32() {}
     ptr32(nullptr_t) : ptr32() {}
     template<class... Args> static ptr32 alloc(Args &&...args) {
@@ -24,10 +25,11 @@ template<class T> struct ptr32 {
     T &operator*() { return pool[p]; }
     T *operator->() { return &pool[p]; }
 
-    static void reserve(int n) { pool.reserve(n + 1); }
+    static enable_if_t<!auto_resize> reserve(int n) { pool.reserve(n + 1); }
 
   private:
     int p = 0;
-    static inline vector<T> pool = vector<T>(1);
+    using pool_t = conditional_t<auto_resize, deque<T>, vector<T>>;
+    static inline pool_t pool = pool_t(1);
     static inline vector<ptr32> del;
 };

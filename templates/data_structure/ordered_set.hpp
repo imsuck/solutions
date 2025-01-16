@@ -1,134 +1,77 @@
-#include <chrono>
-#include <cstdint>
 #include <optional>
-#include <random>
 using namespace std;
 
-template<class> struct st_alloc;
+#include "../data_structure/treap_base.hpp"
 
-// NOTE: The copy constructor only copies the pointer. Becareful when doing
+// NOTE: The copy constructor only copies the pointer. Be careful when doing
 // `ordered_set<> s2 = s1;`
-namespace bst {
-    template<class T> struct bst_node : st_alloc<T> {
-        using ptr = T *;
-        ptr left = nullptr, right = nullptr;
-        int sz = 1;
+namespace oset {
+    using treap::merge, treap::split;
+    template<class T> struct ordered_set {
+        ordered_set() {}
 
-        void pull() {
-            sz = (left ? left->sz : 0) + 1 + (right ? right->sz : 0);
+        void insert(const T &k) {
+            if (contains(k)) return;
+            auto [a, b] = split(root, k, false);
+            root = merge(a, merge(new node(k), b));
         }
+        void erase(const T &k) {
+            if (!contains(k)) return;
+            node *a, *b, *c;
+            tie(a, b) = split(root, k, false);
+            tie(b, c) = split(b, k, true);
+            root = merge(a, c);
+        }
+        optional<T> kth_order(int k) const {
+            if (empty() || k > size()) return nullopt;
+            int ord = 0;
+            for (auto t = root; t;) {
+                int w = ord + size(t->l) + 1;
+                if (w == k) return t->key;
+                t = k < w ? t->l : (ord = w, t->r);
+            };
+            return nullopt;
+        }
+        int order_of(const T &k, bool include = true) const {
+            if (empty()) return 0;
+            int ord = 0;
+            for (auto t = root; t;) {
+                if (k < t->key || (k == t->key && !include)) {
+                    t = t->l;
+                } else {
+                    ord += size(t->l) + 1, t = t->r;
+                }
+            }
+            return ord;
+        }
+        optional<T> pre_upper_bound(const T &k) const {
+            return kth_order(order_of(k));
+        }
+        optional<T> lower_bound(const T &k) const {
+            return kth_order(order_of(k, false) + 1);
+        }
+
+        int size() const { return size(root); }
+        bool empty() const { return size() == 0; }
+        bool contains(const T &k) const {
+            for (auto t = root; t; t = k < t->key ? t->l : t->r)
+                if (k == t->key) return true;
+            return false;
+        }
+
+      private:
+        struct node : treap::node<node> {
+            using base = treap::node<node>;
+            using base::l, base::r;
+
+            T key;
+            int sz = 1;
+            node() {}
+            node(const T k) : key(k) {}
+            void _pull() { sz = size(l) + 1 + size(r); }
+        };
+        node *root = nullptr;
+        static int size(node *t) { return t ? t->sz : 0; }
     };
-    template<class T> int size(const T &t) { return t ? t->sz : 0; }
-
-    template<class T, class Cmp>
-    struct treap_node : bst_node<treap_node<T, Cmp>> {
-        using base = bst_node<treap_node<T, Cmp>>;
-        using ptr = typename base::node_ptr;
-
-        treap_node() {}
-        treap_node(const T &v) : val(v) {}
-
-        T val;
-        uint64_t pr = rng();
-        static inline Cmp cmp{};
-
-        static uint64_t rng() {
-            static mt19937_64 mt(
-                chrono::steady_clock::now().time_since_epoch().count());
-            return mt();
-        }
-
-        static ptr merge(const ptr &l, const ptr &r) {
-            if (!l) return r;
-            if (!r) return l;
-            if (l->pr > r->pr) {
-                l->right = merge(l->right, r), l->pull();
-                return l;
-            } else {
-                r->left = merge(l, r->left), r->pull();
-                return r;
-            }
-        }
-        static pair<ptr, ptr> split(const ptr &t, const T &k,
-                                              bool include) {
-            if (!t) return {nullptr, nullptr};
-            if (cmp(t->val, k) || (t->val == k && include)) {
-                auto s = split(t->right, k, include);
-                t->right = s.first, t->pull();
-                return {t, s.second};
-            } else {
-                auto s = split(t->left, k, include);
-                t->left = s.second, t->pull();
-                return {s.first, t};
-            }
-        }
-    };
-} // namespace bst
-
-template<class T, class Cmp = less<>> struct ordered_set {
-    using treap_node = bst::treap_node<T, Cmp>;
-    using treap_ptr = treap_node *;
-
-    ordered_set() {}
-
-    void insert(const T &x) {
-        if (contains(x)) return;
-        auto [a, b] = treap_node::split(root, x, false);
-        root = treap_node::merge(treap_node::merge(a, new treap_node(x)), b);
-    }
-    void erase(const T &x) {
-        if (!contains(x)) return;
-        treap_ptr a, b, c;
-        tie(a, b) = treap_node::split(root, x, false);
-        tie(b, c) = treap_node::split(b, x, true);
-        root = treap_node::merge(a, c);
-    }
-    optional<T> kth_order(int k) {
-        if (empty() || size() < k) return nullopt;
-        int pref = 0;
-        for (auto cur = root; cur != nullptr;) {
-            if (pref + bst::size(cur->left) + 1 == k) return cur->val;
-            if (pref + bst::size(cur->left) + 1 > k) {
-                cur = cur->left;
-            } else {
-                pref += bst::size(cur->left) + 1;
-                cur = cur->right;
-            }
-        }
-        return nullopt;
-    }
-    int order_of(const T &x, bool include = true) {
-        int ord = 0;
-        for (auto cur = root; cur != nullptr;) {
-            if (cmp(cur->val, x) || (cur->val == x && include)) {
-                ord += bst::size(cur->left) + 1;
-                cur = cur->right;
-            } else {
-                cur = cur->left;
-            }
-        }
-        return ord;
-    }
-    optional<T> pre_upper_bound(const T &x) {
-        if (contains(x)) return x;
-        return kth_order(order_of(x));
-    }
-    optional<T> lower_bound(const T &x) {
-        if (contains(x)) return x;
-        return kth_order(order_of(x, false) + 1);
-    }
-
-    int size() const { return root ? root->sz : 0; }
-    bool empty() const { return !root; }
-    bool contains(const T &x) {
-        for (auto cur = root; cur != nullptr;) {
-            if (cur->val == x) return true;
-            cur = cmp(x, cur->val) ? cur->left : cur->right;
-        }
-        return false;
-    }
-
-  private:
-    treap_ptr root = nullptr;
-    static inline Cmp cmp{};
-};
+} // namespace oset
+using oset::ordered_set;
