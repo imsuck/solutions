@@ -1,6 +1,6 @@
 #include <memory>
 #include <random>
-#include <unordered_map>
+#include <map>
 using namespace std;
 
 template<class> struct st_alloc {};
@@ -22,8 +22,12 @@ namespace _ETT {
             return mt();
         }
     };
-    int sz(ptr t) { return t ? t->sz : 0; }
-    int _sm(ptr t) { return t ? t->sum : 0; }
+    static int sz(ptr t) { return t ? t->sz : 0; }
+    static int _sm(ptr t) { return t ? t->sum : 0; }
+    static ptr &par(ptr t) {
+        static ptr null = new node();
+        return t ? t->p : null;
+    }
     ptr pull(ptr t) {
         t->sz = sz(t->l) + 1 + sz(t->r);
         t->sum = _sm(t->l) + t->val + _sm(t->r);
@@ -33,11 +37,11 @@ namespace _ETT {
         if (!l || !r) return l ? l : r;
         if (l->pr < r->pr) {
             l->r = merge(l->r, r);
-            l->r ? l->r->p = l : 0;
+            par(l->r) = l;
             return pull(l);
         } else {
             r->l = merge(l, r->l);
-            r->l ? r->l->p = r : 0;
+            par(r->l) = r;
             return pull(r);
         }
     }
@@ -45,19 +49,15 @@ namespace _ETT {
         if (k < 0 || sz(t) < k) return {};
         if (!t) return {0, 0};
         int w = sz(t->l);
-        ptr a, b;
+        ptr a;
         if (k <= w) {
-            tie(a, b) = split(t->l, k);
-            t->l = b;
-            t->l ? t->l->p = t : 0;
-            a ? a->p = 0 : 0;
+            tie(a, t->l) = split(t->l, k);
+            par(t->l) = t, par(a) = 0;
             return {a, pull(t)};
         } else {
-            tie(a, b) = split(t->r, k - w - 1);
-            t->r = a;
-            t->r ? t->r->p = t : 0;
-            b ? b->p = 0 : 0;
-            return {pull(t), b};
+            tie(t->r, a) = split(t->r, k - w - 1);
+            par(t->r) = t, par(a) = 0;
+            return {pull(t), a};
         }
     }
     int ord(ptr t) {
@@ -100,18 +100,15 @@ namespace _ETT {
         }
 
         int n;
-        vector<unordered_map<int, ptr>> edges;
+        vector<map<int, ptr>> edges;
         ptr &edge(int u, int v) {
-            auto it = edges[u].find(v);
-            return it != edges[u].end() ? it->second : edges[u][v] = new node();
+            return edges[u][v] = edges[u][v] ?: new node();
         }
 
         ptr reroot(int u, int v, bool rev = false) {
-            auto &e = edge(u, v);
-            ptr a, b;
+            ptr e = edge(u, v), a, b;
             tie(a, b) = split(root(e), ord(e) + rev);
-            merge(b, a);
-            return root(e);
+            return merge(b, a);
         }
     };
 } // namespace _ETT
