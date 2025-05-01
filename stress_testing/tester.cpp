@@ -13,9 +13,16 @@ void gen_test() {
     [[maybe_unused]]
     auto println = [&](auto &&...xs) { print(xs...), cout << "\n"; };
 
-    const int n = rand<int>(2, 100);
-    println(n);
-    for (int i = 0; i < n; i++) cout << rand<int>(1, 1000) << " \n"[i == n - 1];
+    const int n = rand<int>(3, 3), q = rand<int>(1, 1);
+    println(n, q);
+    for (int i = 0; i < n; i++) cout << rand<int>(1, 2) << " \n"[i == n - 1];
+
+    for (int _ = 0; _ < q; _++) {
+        int l = rand<int>(1, n), r = rand<int>(1, n);
+        if (l > r) swap(l, r);
+        int x = rand<int>(-1, 1);
+        println(l, r, x);
+    }
 }
 
 int main(int argc, char *argv[]) {

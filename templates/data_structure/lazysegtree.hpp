@@ -50,13 +50,12 @@ template<class M> struct LazySegTree {
         assert(0 <= l && l <= r && r <= n);
         if (l == r) return;
         push_to(l), push_to(r - 1);
-        for (int l2 = l += n, r2 = r += n; l2 < r2; l2 >>= 1, r2 >>= 1) {
+        for (int l2 = l + n, r2 = r + n; l2 < r2; l2 >>= 1, r2 >>= 1) {
             if (l2 & 1) all_apply(l2++, f);
             if (r2 & 1) all_apply(--r2, f);
         }
-        int li = __builtin_ctz(l), ri = __builtin_ctz(r);
-        for (int i = li + 1; i <= lg; i++) update(l >> i);
-        for (int i = ri + 1; i <= lg; i++) update((r - 1) >> i);
+        int li = __builtin_ctz(l + n), ri = __builtin_ctz(r + n);
+        update_from(l, li), update_from(r - 1, ri);
     }
 
   private:
@@ -65,9 +64,9 @@ template<class M> struct LazySegTree {
     vector<char> upd;
     vector<F> lz;
     void update(int p) { t[p] = M::op(t[p << 1], t[p << 1 | 1]); }
-    void update_from(int p) {
+    void update_from(int p, int l = 0) {
         p += n;
-        for (int i = 1; i <= lg; i++) update(p >> i);
+        for (int i = l + 1; i <= lg; i++) update(p >> i);
     }
     void all_apply(int p, const F &f) {
         bool ok = M::map(f, t[p]);
