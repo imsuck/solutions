@@ -2,18 +2,22 @@
 using namespace std;
 
 template<class T> struct Compressor {
-    Compressor(const vector<T> &a) : v(a) {
-        sort(begin(v), end(v));
-        v.erase(unique(begin(v), end(v)), end(v));
-    }
-    bool find(T x) const { return binary_search(begin(v), end(v), x); }
-    int operator()(T x) const {
-        return int(lower_bound(begin(v), end(v), x) - begin(v));
-    }
-    T operator[](int i) const { return v[i]; }
-    int size() const { return (int)v.size(); }
+    vector<reference_wrapper<T>> val;
+    vector<T> og;
 
-  private:
-    vector<T> v;
+    void push(T &x) { val.push_back(x); }
+    void build() {
+        sort(begin(val), end(val));
+        og.reserve(val.size());
+        T id = -1, prv = -1;
+        for (reference_wrapper<T> &x : val) {
+            if (prv != x) {
+                id++, prv = x;
+                og.push_back(x);
+            }
+            x.get() = id;
+        }
+    }
+    T operator[](int i) const { return og[i]; }
+    bool find(T x) { return binary_search(begin(og), end(og), x); }
 };
-template<class T> Compressor<T> compress(const vector<T> &v) { return {v}; }
