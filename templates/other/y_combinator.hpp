@@ -3,6 +3,7 @@ using namespace std;
 
 template<class F> struct y_comb_t {
     F f;
+    template<class T> y_comb_t(T &&_f) : f(forward<T>(_f)) {}
     template<class... Args> decltype(auto) operator()(Args &&...args) {
         return f(/* ref */(*this), forward<Args>(args)...);
     }

@@ -18,7 +18,7 @@ template<class T> struct Compressor {
             x.get() = id;
         }
     }
-    int size() const { return og.size(); }
+    int size() const { return int(og.size()); }
     T operator[](int i) const { return og[i]; }
     bool find(T x) const { return binary_search(begin(og), end(og), x); }
 };

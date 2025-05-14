@@ -10,5 +10,5 @@ g++ (your compilation flags here e.g. -std=c++17) stdc++.h
 ```
 Or if you're using the autocompiling script
 ```sh
-g++ -std=c++17 -DLOCAL -fsanitize=undefined,address -g stdc++.h
+g++ -std=c++17 -DLOCAL -D_GLIBCXX_NO_ASSERTIONS -fsanitize=undefined,address -g stdc++.h
 ```
