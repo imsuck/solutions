@@ -21,8 +21,8 @@ template<uint32_t m> struct modint {
 
     constexpr mint &operator++() noexcept { return _v = ++_v == mod() ? 0 : _v, *this; }
     constexpr mint &operator--() noexcept { --(_v ? _v : _v = mod()); return *this; }
-    constexpr mint operator++(int) const noexcept { return exchange(*this, ++mint(*this)); }
-    constexpr mint operator--(int) const noexcept { return exchange(*this, --mint(*this)); }
+    constexpr mint operator++(int) noexcept { return exchange(*this, ++mint(*this)); }
+    constexpr mint operator--(int) noexcept { return exchange(*this, --mint(*this)); }
 
     constexpr mint &operator+=(mint rhs) noexcept {
         return _v = int(_v += rhs._v - mod()) < 0 ? _v + mod() : _v, *this;

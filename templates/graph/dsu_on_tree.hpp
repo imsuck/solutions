@@ -3,9 +3,9 @@ using namespace std;
 
 // clang-format off
 template<class G> struct DsuOnTree {
-    DsuOnTree(G &_g, int _root = 0)
-        : g(_g), n(int(g.size())), root(_root), sz(n, 1), euler(n), in(n),
-          out(n) {
+    DsuOnTree(G &_g, int _root = 0) :
+        g(_g), n(int(g.size())), root(_root), sz(n, 1), euler(n), in(n),
+        out(n) {
         auto dfs = [&](auto &self, int v, int p) -> void {
             euler[time] = v, in[v] = time++;
             if (g[v].size() && g[v][0] == p) swap(g[v][0], g[v].back());

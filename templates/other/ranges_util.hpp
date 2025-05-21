@@ -27,8 +27,10 @@ template<class T> crev_t<T> rev(const T &a) { return {a}; }
 template<class T = int> struct range {
     range() {}
     range(T _stop) : stop(_stop) {}
-    range(T _start, T _stop, T _step = 1)
-        : start(_start), stop(_stop), step(_step) { assert(step != 0); }
+    range(T _start, T _stop, T _step = 1) :
+        start(_start), stop(_stop), step(_step) {
+        assert(step != 0);
+    }
 
     bool operator!=(range) { return step > 0 ? cur < stop : stop < cur; }
     void operator++() { cur += step; }
