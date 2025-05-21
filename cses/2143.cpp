@@ -16,7 +16,8 @@ template<class G> auto find_scc(const G &g) {
             scc.emplace_back();
             int x;
             do {
-                x = z.back(); z.pop_back();
+                x = z.back();
+                z.pop_back();
                 added[x] = true;
                 scc.back().push_back(x);
             } while (x != v);
@@ -58,7 +59,7 @@ int main() {
     auto [scc, rep, gd] = condense(g);
 
     vector<char> vis(gd.size());
-    auto dfs = [&](auto &self, int v) -> void {
+    auto dfs = [&, &gd = gd](auto &self, int v) -> void {
         vis[v] = true;
         dp[v].set(v);
         for (int u : gd[v]) {
