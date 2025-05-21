@@ -11,10 +11,11 @@ struct RollingHash {
         return dist(rng);
     }
 
-    RollingHash(const string &s, u64 _base) noexcept
-        : RollingHash(vector<char>(begin(s), end(s)), _base) {}
-    template<class T> RollingHash(const vector<T> &v, u64 _base) noexcept
-        : base(_base), hashes(v.size() + 1), power(v.size() + 1) {
+    RollingHash(const string &s, u64 _base) noexcept :
+        RollingHash(vector<char>(begin(s), end(s)), _base) {}
+    template<class T>
+    RollingHash(const vector<T> &v, u64 _base) noexcept :
+        base(_base), hashes(v.size() + 1), power(v.size() + 1) {
         power[0] = 1;
         for (int i = 0; i < int(v.size()); i++) {
             power[i + 1] = mul(power[i], base);

@@ -8,9 +8,9 @@ using namespace std;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 template<class T, class Q, class Op> struct RangeQuery {
-    RangeQuery(const vector<T> &v, const vector<Q> &_q, Op _op, T e)
-        : ans(_q.size()), n(v.size()), d(v), lef(n, e), rig(n, e),
-          idx(_q.size()), q(_q), op(_op) {
+    RangeQuery(const vector<T> &v, const vector<Q> &_q, Op _op, T e) :
+        ans(_q.size()), n(v.size()), d(v), lef(n, e), rig(n, e), idx(_q.size()),
+        q(_q), op(_op) {
         iota(begin(idx), end(idx), 0);
     }
     void solve() { _solve(0, n - 1, idx); }

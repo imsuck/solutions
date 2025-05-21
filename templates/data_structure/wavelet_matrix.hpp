@@ -12,8 +12,8 @@ using u64 = uint64_t;
 #pragma GCC diagnostic ignored "-Wconversion"
 struct BitVec {
     BitVec() = default;
-    explicit BitVec(int n, const vector<bool> &a)
-        : BitVec(n, [&](int i) { return a[i]; }) {}
+    explicit BitVec(int n, const vector<bool> &a) :
+        BitVec(n, [&](int i) { return a[i]; }) {}
     template<class Gen> BitVec(int n, Gen gen) : v(n / wordsize + 1) {
         for (int i = 0; i < n; i++)
             v[i / wordsize].bit |= size_t(gen(i)) << i % wordsize;
@@ -51,8 +51,8 @@ struct BitVec {
 template<class T, int bit_num = numeric_limits<T>::digits>
 struct WaveletMatrix {
     WaveletMatrix() = default;
-    explicit WaveletMatrix(const vector<T> &a)
-        : WaveletMatrix(a.size(), [&](int i) { return a[i]; }) {}
+    explicit WaveletMatrix(const vector<T> &a) :
+        WaveletMatrix(a.size(), [&](int i) { return a[i]; }) {}
     template<class Gen> WaveletMatrix(int _n, Gen gen) : n(_n) {
         vector<T> a(n), l(n), r(n);
         for (int i = 0; i < n; i++)

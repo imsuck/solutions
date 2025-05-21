@@ -5,8 +5,12 @@ using namespace std;
 // Modified version of atcoder library's segtree.hpp
 template<class M> struct SegTree {
     using T = typename M::T;
+
+    const int n, m;
+    vector<T> t;
+
     SegTree() = default;
-    SegTree(int _n) : n(_n), m(bit_ceil(n)), t(n * 2, M::id()) {}
+    SegTree(int _n) : n(_n), m(bit_ceil(n)), t(2 * m, M::id()) {}
     template<class V> SegTree(const V &v) : SegTree(int(v.size())) {
         copy(begin(v), end(v), begin(t) + m);
         for (int i = m; --i;) update(i);
@@ -38,7 +42,7 @@ template<class M> struct SegTree {
         l += m;
         T sm = M::id();
         do {
-            while (l % 2 == 0) l /= 2;
+            for (; l % 2 == 0; l /= 2);
             if (!g(M::op(sm, t[l]))) {
                 while (l < m) {
                     l = 2 * l;
@@ -57,8 +61,7 @@ template<class M> struct SegTree {
         r += m;
         T sm = M::id();
         do {
-            r--;
-            while (r > 1 && r % 2) r /= 2;
+            for (r--; r > 1 && r % 2; r /= 2);
             if (!g(M::op(t[r], sm))) {
                 while (r < m) {
                     r = 2 * r + 1;
@@ -75,7 +78,5 @@ template<class M> struct SegTree {
     // clang-format off
     static int bit_ceil(int n) { int m = 1; while (m < n) m *= 2; return m; }
     // clang-format on
-    const int n, m;
-    vector<T> t;
     void update(int p) { t[p] = M::op(t[p << 1], t[p << 1 | 1]); }
 };
