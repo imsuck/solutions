@@ -2,6 +2,7 @@
 
 TIME_FMT="Time: %es Mem: %MKB"
 RUN_CMD="./a.out < a.inp; echo"
+export ASAN_OPTIONS=print_legend=false
 
 echo
 echo "------------- Test -------------"

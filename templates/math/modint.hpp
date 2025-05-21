@@ -19,40 +19,28 @@ template<uint32_t m> struct modint {
     constexpr static mint raw(uint32_t v) noexcept { mint x; return x._v = v, x; }
     template<class T> constexpr explicit operator T() const noexcept { return _v; }
 
-    constexpr mint &operator++() noexcept {
-        _v++;
-        if (_v == mod()) _v = 0;
-        return *this;
-    }
-    constexpr mint &operator--() noexcept {
-        if (_v == 0) _v = mod();
-        _v--;
-        return *this;
-    }
-    constexpr mint operator++(int) noexcept { return exchange(*this, ++mint(*this)); }
-    constexpr mint operator--(int) noexcept { return exchange(*this, --mint(*this)); }
+    constexpr mint &operator++() noexcept { return _v = ++_v == mod() ? 0 : _v, *this; }
+    constexpr mint &operator--() noexcept { --(_v ? _v : _v = mod()); return *this; }
+    constexpr mint operator++(int) const noexcept { return exchange(*this, ++mint(*this)); }
+    constexpr mint operator--(int) const noexcept { return exchange(*this, --mint(*this)); }
 
-    constexpr mint &operator+=(const mint &rhs) noexcept {
-        _v += rhs._v;
-        if (_v >= mod()) _v -= mod();
-        return *this;
+    constexpr mint &operator+=(mint rhs) noexcept {
+        return _v = int(_v += rhs._v - mod()) < 0 ? _v + mod() : _v, *this;
     }
-    constexpr mint &operator-=(const mint &rhs) noexcept {
-        _v += mod() - rhs._v;
-        if (_v >= mod()) _v -= mod();
-        return *this;
+    constexpr mint &operator-=(mint rhs) noexcept {
+        return _v = int(_v -= rhs._v) < 0 ? _v + mod() : _v, *this;
     }
-    constexpr mint &operator*=(const mint &rhs) noexcept {
+    constexpr mint &operator*=(mint rhs) noexcept {
         return _v = uint64_t(_v) * rhs._v % mod(), *this;
     }
-    constexpr mint &operator/=(const mint &rhs) noexcept {
+    constexpr mint &operator/=(mint rhs) noexcept {
         return *this = *this * rhs.inv();
     }
 
-    constexpr friend mint operator+(mint l, const mint &r) noexcept { return l += r; }
-    constexpr friend mint operator-(mint l, const mint &r) noexcept { return l -= r; }
-    constexpr friend mint operator*(mint l, const mint &r) noexcept { return l *= r; }
-    constexpr friend mint operator/(mint l, const mint &r) noexcept { return l /= r; }
+    constexpr friend mint operator+(mint l, mint r) noexcept { return l += r; }
+    constexpr friend mint operator-(mint l, mint r) noexcept { return l -= r; }
+    constexpr friend mint operator*(mint l, mint r) noexcept { return l *= r; }
+    constexpr friend mint operator/(mint l, mint r) noexcept { return l /= r; }
 
     constexpr mint operator+() const noexcept { return *this; }
     constexpr mint operator-() const noexcept { return raw(_v ? mod() - _v : 0); }
