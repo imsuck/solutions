@@ -8,9 +8,9 @@ template<class M, class I = int> struct DynSegTree {
     DynSegTree() = default;
     DynSegTree(int _n) : n(_n), root(new node()) {}
 
-    void set(I p, const T &x) {
+    void set(I p, const T &x) const {
         assert(0 <= p && p < n);
-        auto rec = [&](auto &self, node_ptr t, I l, I r) -> void {
+        auto rec = [&](auto &self, ptr t, I l, I r) -> void {
             if (r - l == 1) return void(t->val = x);
             I m = (l + r) / 2;
             if (p < m) self(self, t->c(0), l, m);
@@ -21,7 +21,7 @@ template<class M, class I = int> struct DynSegTree {
     }
     T operator[](I p) const {
         assert(0 <= p && p < n);
-        auto rec = [&](auto &self, node_ptr t, I l, I r) -> T {
+        auto rec = [&](auto &self, ptr t, I l, I r) -> T {
             if (!t) return M::id();
             if (r - l == 1) return t->val;
             I m = (l + r) / 2;
@@ -32,7 +32,7 @@ template<class M, class I = int> struct DynSegTree {
     T get(I p) const { return (*this)[p]; }
     T operator()(I l, I r) const {
         assert(0 <= l && l <= r && r <= n);
-        auto rec = [&](auto &self, node_ptr t, I tl, I tr) -> T {
+        auto rec = [&](auto &self, ptr t, I tl, I tr) -> T {
             if (!t) return M::id();
             if (l <= tl && tr <= r) return t->val;
             I tm = (tl + tr) / 2;
@@ -47,19 +47,19 @@ template<class M, class I = int> struct DynSegTree {
 
   private:
     struct node;
-    using node_ptr = node *;
+    using ptr = node *;
     struct node : st_alloc<node> {
         T val = M::id();
-        node_ptr l = nullptr, r = nullptr;
+        ptr l = nullptr, r = nullptr;
         node() {}
-        inline node_ptr c(bool z) {
+        inline ptr c(bool z) {
             return !z ? l ? l : l = new node() : r ? r : r = new node();
         }
     };
 
     I n;
-    node_ptr root;
+    ptr root;
 
-    static inline T val(node_ptr t) { return t ? t->val : M::id(); }
+    static inline T val(ptr t) { return t ? t->val : M::id(); }
 };
 // clang-format on

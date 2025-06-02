@@ -51,9 +51,9 @@ template<class M> struct Treap {
 
   private:
     struct node;
-    using node_ptr = node *;
+    using ptr = node *;
     struct node : st_alloc<node> {
-        node_ptr l = nullptr, r = nullptr;
+        ptr l = nullptr, r = nullptr;
         T val = M::id(), prod = M::id();
         uint64_t pr = rng();
         int sz = 1;
@@ -66,12 +66,12 @@ template<class M> struct Treap {
         }
     };
 
-    node_ptr root = nullptr;
-    explicit Treap(node_ptr t) : root(t) {}
+    ptr root = nullptr;
+    explicit Treap(ptr t) : root(t) {}
 
-    static int sz(node_ptr t) { return t ? t->sz : 0; }
-    static T prd(node_ptr t) { return t ? t->prod : M::id(); }
-    static void push(node_ptr t) {
+    static int sz(ptr t) { return t ? t->sz : 0; }
+    static T prd(ptr t) { return t ? t->prod : M::id(); }
+    static void push(ptr t) {
         if (t->rev) {
             swap(t->l, t->r);
             if (t->l) t->l->rev ^= true;
@@ -79,12 +79,12 @@ template<class M> struct Treap {
             t->rev = false;
         }
     }
-    static node_ptr pull(node_ptr t) {
+    static ptr pull(ptr t) {
         t->sz = sz(t->l) + 1 + sz(t->r);
         t->prod = M::op(M::op(prd(t->l), t->val), prd(t->r));
         return t;
     }
-    static node_ptr merge(node_ptr l, node_ptr r) {
+    static ptr merge(ptr l, ptr r) {
         if (!l || !r) return l ? l : r;
         push(l), push(r);
         if (l->pr < r->pr) {
@@ -95,7 +95,7 @@ template<class M> struct Treap {
             return pull(l);
         }
     }
-    static pair<node_ptr, node_ptr> split(node_ptr t, int k) {
+    static pair<ptr, ptr> split(ptr t, int k) {
         if (!t) return {nullptr, nullptr};
         push(t);
         int w = sz(t->l);
@@ -109,11 +109,11 @@ template<class M> struct Treap {
             return {pull(t), s.second};
         }
     }
-    static node_ptr merge(node_ptr a, node_ptr b, node_ptr c) {
+    static ptr merge(ptr a, ptr b, ptr c) {
         return merge(merge(a, b), c);
     }
-    static tuple<node_ptr, node_ptr, node_ptr> split(node_ptr t, int l, int r) {
-        node_ptr a, b, c;
+    static tuple<ptr, ptr, ptr> split(ptr t, int l, int r) {
+        ptr a, b, c;
         tie(a, b) = split(t, l);
         tie(b, c) = split(b, r - l);
         return {a, b, c};

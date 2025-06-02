@@ -6,7 +6,7 @@ using namespace std;
 template<class M> struct SegTree {
     using T = typename M::T;
 
-    const int n, m;
+    int n, m;
     vector<T> t;
 
     SegTree() = default;
@@ -33,6 +33,8 @@ template<class M> struct SegTree {
         }
         return M::op(resl, resr);
     }
+    T pref(int r) const { return (*this)(0, r); }
+    T suff(int l) const { return (*this)(l, n); }
     T prod(int l, int r) const { return (*this)(l, r); }
     T all_prod() const { return t[1]; }
     template<class G> int max_right(int l, G &&g) const {
