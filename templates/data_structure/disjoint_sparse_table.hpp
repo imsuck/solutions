@@ -2,7 +2,6 @@
 #include <vector>
 using namespace std;
 
-// clang-format off
 template<class M> struct DisjointSparseTable {
     using T = typename M::T;
     DisjointSparseTable(const vector<T> &v) : n(int(v.size())) {
@@ -33,4 +32,3 @@ template<class M> struct DisjointSparseTable {
     int n;
     vector<vector<T>> t;
 };
-// clang-format on

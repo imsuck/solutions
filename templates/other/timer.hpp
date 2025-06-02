@@ -1,8 +1,8 @@
 #include <chrono>
 using namespace std;
-using namespace chrono;
 
 #if false
+using namespace chrono;
 struct Timer {
     string _msg;
     time_point<steady_clock> start = steady_clock::now(), end;
@@ -18,6 +18,7 @@ struct Timer {
 #endif
 
 #if true
+using namespace chrono;
 template<class Fn> struct Timer {
     Fn fn;
     time_point<steady_clock> start = steady_clock::now(), end;

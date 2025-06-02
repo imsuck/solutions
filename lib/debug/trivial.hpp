@@ -9,8 +9,9 @@
 namespace dbg {
     using namespace std;
     namespace _detail {
-        template<typename T,
-                 enable_if_t<!is_floating_point_v<remove_cvref_t<T>>, int> = 1>
+        template<
+            typename T,
+            enable_if_t<!is_floating_point_v<remove_cvref_t<T>>, int> = 1>
         inline string dbg_arithmetic(T n) {
             const bool neg = n < 0;
             make_unsigned_t<remove_cvref_t<T>> x = n;
@@ -25,8 +26,9 @@ namespace dbg {
             if (output.empty()) output = "0";
             return output;
         }
-        template<typename T,
-                 enable_if_t<is_floating_point_v<remove_cvref_t<T>>, int> = 1>
+        template<
+            typename T,
+            enable_if_t<is_floating_point_v<remove_cvref_t<T>>, int> = 1>
         inline string dbg_arithmetic(T x) {
             return to_string(x);
         }
@@ -43,13 +45,17 @@ namespace dbg {
             return "(" + dbg_info(p.first) + ", " + dbg_info(p.second) + ")";
         }
 
-        template<typename... Ts, size_t idx = 0>
+        template<size_t idx = 0, typename... Ts>
         inline string dbg_tuple_helper(const tuple<Ts...> &t) {
-            return "";
+            if constexpr (idx == sizeof...(Ts)) return "";
+            string output = idx ? ", " : "";
+            if constexpr (idx < sizeof...(Ts))
+                output += dbg_info(get<idx>(t)) + dbg_tuple_helper<idx + 1>(t);
+            return output;
         }
         template<typename... Ts>
         inline string dbg_tuple(const tuple<Ts...> &t) {
-            return "(" + dbg_tuple_helper<Ts...>(t) + ")";
+            return "(" + dbg_tuple_helper(t) + ")";
         }
 
         template<typename T> inline string dbg_streamable(T &&x) {
