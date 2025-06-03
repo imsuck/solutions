@@ -7,7 +7,7 @@ template<class M, class I = int> struct DynLazySegTree {
     struct node;
     using ptr = node *;
     struct node : st_alloc<node> {
-        ptr p = 0, l = 0, r = 0;
+        ptr l = 0, r = 0;
         T x = M::id();
         F lz = M::fid();
 
@@ -15,8 +15,7 @@ template<class M, class I = int> struct DynLazySegTree {
 
         ptr ch(bool z) {
             auto &c = !z ? l : r;
-            c = c ?: new node(), c->p = this;
-            return c;
+            return c = c ?: new node();
         }
     };
 
@@ -57,21 +56,28 @@ template<class M, class I = int> struct DynLazySegTree {
         };
         rec(rec, root, 0, n);
     }
-    template<class G> I max_right(G &&g) const {
+    template<class G> I max_right(I l, G &&g) const {
+        assert(0 <= l && l <= n);
         assert(g(M::id()));
+        if (l == n) return n;
+        I r = l;
         T sm = M::id();
         auto rec = [&](auto &self, ptr t, I tl, I tr) {
-            if (tr - tl == 1) return g(M::op(sm, t->x)) ? tr : tl;
+            if (tr - tl == 1) return r = g(M::op(sm, t->x)) ? tr : tl, t->x;
+            if (l <= tl && g(M::op(sm, t->x))) return r = tr, t->x;
             push(t, tl, tr);
             I tm = (tl + tr) / 2;
-            if (!g(M::op(sm, t->l->x))) {
-                return self(self, t->l, tl, tm);
+            if (tm <= l) return self(self, t->r, tm, tr);
+            auto lx = self(self, t->l, tl, tm);
+            if (!g(M::op(sm, lx))) {
+                return lx;
             } else {
-                sm = M::op(sm, t->l->x);
+                sm = M::op(sm, lx);
                 return self(self, t->r, tm, tr);
             }
         };
-        return rec(rec, root, 0, n);
+        rec(rec, root, 0, n);
+        return r;
     }
 
   private:
