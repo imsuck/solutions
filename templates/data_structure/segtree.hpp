@@ -17,7 +17,7 @@ template<class M> struct SegTree {
     }
     void set(int p, T val) {
         assert(0 <= p && p < n);
-        for (t[p += m] = val; p /= 2;) update(p);
+        for (t[p += m] = val; p >>= 1;) update(p);
     }
     T operator[](int p) const {
         assert(0 <= p && p < n);
@@ -27,7 +27,7 @@ template<class M> struct SegTree {
     T operator()(int l, int r) const {
         assert(0 <= l && l <= r && r <= n);
         T resl = M::id(), resr = M::id();
-        for (l += m, r += m; l < r; l /= 2, r /= 2) {
+        for (l += m, r += m; l < r; l >>= 1, r >>= 1) {
             if (l & 1) resl = M::op(resl, t[l++]);
             if (r & 1) resr = M::op(t[--r], resr);
         }
@@ -44,10 +44,10 @@ template<class M> struct SegTree {
         l += m;
         T sm = M::id();
         do {
-            for (; l % 2 == 0; l /= 2);
+            for (; l % 2 == 0; l >>= 1);
             if (!g(M::op(sm, t[l]))) {
                 while (l < m) {
-                    l = 2 * l;
+                    l = l << 1;
                     if (g(M::op(sm, t[l]))) sm = M::op(sm, t[l++]);
                 }
                 return l - m;
@@ -63,10 +63,10 @@ template<class M> struct SegTree {
         r += m;
         T sm = M::id();
         do {
-            for (r--; r > 1 && r % 2; r /= 2);
+            for (r--; r > 1 && r & 1; r >>= 1);
             if (!g(M::op(t[r], sm))) {
                 while (r < m) {
-                    r = 2 * r + 1;
+                    r = r << 1 | 1;
                     if (g(M::op(t[r], sm))) sm = M::op(t[r--], sm);
                 }
                 return r + 1 - m;

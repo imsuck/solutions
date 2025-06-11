@@ -14,7 +14,7 @@ namespace dbg {
             enable_if_t<!is_floating_point_v<remove_cvref_t<T>>, int> = 1>
         inline string dbg_arithmetic(T n) {
             const bool neg = n < 0;
-            make_unsigned_t<remove_cvref_t<T>> x = n;
+            _detail::make_unsigned_t<remove_cvref_t<T>> x = n;
             if (neg) x = -x;
             string output;
             while (x != 0) {

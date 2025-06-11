@@ -43,7 +43,30 @@ namespace dbg {
         template<typename T>
         using remove_cvref_t = typename remove_cvref<T>::type;
 
-        // Arithmetic ----------------------------------------------------------
+#ifdef __SIZEOF_INT128__
+        template<class T>
+        using is_signed_int128 = conditional_t<
+            is_same_v<T, __int128_t> || is_same_v<T, __int128>,
+            true_type,
+            false_type>;
+        template<class T>
+        using make_unsigned_t = conditional_t<
+            is_signed_int128<T>::value,
+            __uint128_t,
+            conditional_t<
+                is_signed_v<T>,
+                std::make_unsigned_t<T>,
+                common_type_t<T>>>;
+#else
+        template<class T>
+        using make_unsigned_t = std::conditional_t<
+            is_signed_v<T>,
+            std::make_unsigned<T>,
+            common_type<T>>;
+#endif
+
+        // Arithmetic
+        // ----------------------------------------------------------
         template<typename T> struct is_vec_bool_ref {
             template<typename TT>
             static auto test(int) -> enable_if_t<
@@ -53,18 +76,17 @@ namespace dbg {
 
             static constexpr bool value = decltype(test<T>(0))::value;
         };
+#ifdef __SIZEOF_INT128__
+        template<typename T>
+        inline constexpr bool is_int128_v =
+            is_any_of_v<remove_cvref_t<T>, __int128_t, __uint128_t>;
+#else
+        template<typename> inline constexpr bool is_int128_v = false;
+#endif
         template<typename T>
         inline constexpr bool is_arithmetic_v =
-            std::is_arithmetic_v<remove_cvref_t<T>> ||
+            std::is_arithmetic_v<remove_cvref_t<T>> || is_int128_v<T> ||
             is_vec_bool_ref<T>::value;
-#ifdef __SIZEOF_INT128__
-        template<
-            typename T,
-            enable_if_t<
-                is_any_of_v<remove_cvref_t<T>, __int128_t, __uint128_t>,
-                int> = 1>
-        inline constexpr bool is_arithmetic = true;
-#endif
 
         // String --------------------------------------------------------------
         template<typename T>

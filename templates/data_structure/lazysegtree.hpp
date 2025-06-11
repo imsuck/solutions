@@ -14,7 +14,7 @@ template<class M> struct LazySegTree {
 
     LazySegTree() = default;
     LazySegTree(int _n) :
-        n(_n), lg(_lg(n)), m(1 << lg), t(m * 2, M::id()), upd(m),
+        n(_n), lg(_lg(n)), m(1 << lg), t(2 * m, M::id()), upd(m),
         lz(m, M::fid()) {}
     template<class V> LazySegTree(const V &v) : LazySegTree(int(v.size())) {
         copy(begin(v), end(v), begin(t) + m);
@@ -37,7 +37,7 @@ template<class M> struct LazySegTree {
         int li = __builtin_ctz(l + m), ri = __builtin_ctz(r + m);
         push_to(l, li), push_to(r - 1, ri);
         T sml = M::id(), smr = M::id();
-        for (l += m, r += m; l < r; l /= 2, r /= 2) {
+        for (l += m, r += m; l < r; l >>= 1, r >>= 1) {
             if (l & 1) sml = M::op(sml, t[l++]);
             if (r & 1) smr = M::op(t[--r], smr);
         }
@@ -56,7 +56,7 @@ template<class M> struct LazySegTree {
         if (l == r) return;
         int li = __builtin_ctz(l + m), ri = __builtin_ctz(r + m);
         push_to(l, li), push_to(r - 1, ri);
-        for (int l2 = l + m, r2 = r + m; l2 < r2; l2 /= 2, r2 /= 2) {
+        for (int l2 = l + m, r2 = r + m; l2 < r2; l2 >>= 1, r2 >>= 1) {
             if (l2 & 1) all_apply(l2++, f);
             if (r2 & 1) all_apply(--r2, f);
         }
@@ -70,10 +70,10 @@ template<class M> struct LazySegTree {
         push_to(l), l += m;
         T sm = M::id();
         do {
-            for (; l % 2 == 0; l /= 2);
+            for (; l % 2 == 0; l >>= 1);
             if (!g(M::op(sm, t[l]))) {
                 while (l < m) {
-                    push(l), l = 2 * l;
+                    push(l), l = l << 1;
                     if (g(M::op(sm, t[l]))) sm = M::op(sm, t[l++]);
                 }
                 return l - m;
@@ -88,10 +88,10 @@ template<class M> struct LazySegTree {
         push_to(r - 1), r += m;
         T sm = M::id();
         do {
-            for (r--; r > 1 && r % 2; r /= 2);
+            for (r--; r > 1 && r % 2; r >>= 1);
             if (!g(M::op(t[r], sm))) {
                 while (r < m) {
-                    push(r), r = 2 * r + 1;
+                    push(r), r = r << 1 | 1;
                     if (g(M::op(t[r], sm))) sm = M::op(t[r--], sm);
                 }
                 return r + 1 - m;
@@ -105,7 +105,7 @@ template<class M> struct LazySegTree {
     // clang-format off
     static int _lg(int n) { int l = 0; while (1 << l < n) l++; return l; }
     // clang-format on
-    void update(int p) { t[p] = M::op(t[2 * p], t[2 * p + 1]); }
+    void update(int p) { t[p] = M::op(t[p << 1], t[p << 1 | 1]); }
     void update_from(int p, int l = 0) {
         p += m;
         for (int i = l + 1; i <= lg; i++) update(p >> i);
@@ -120,7 +120,7 @@ template<class M> struct LazySegTree {
     }
     void push(int p) {
         if (!upd[p]) return;
-        all_apply(2 * p, lz[p]), all_apply(2 * p + 1, lz[p]);
+        all_apply(p << 1, lz[p]), all_apply(p << 1 | 1, lz[p]);
         lz[p] = M::fid(), upd[p] = false;
     }
     void push_to(int p, int l = 0) {
