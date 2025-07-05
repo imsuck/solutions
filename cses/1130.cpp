@@ -1,6 +1,16 @@
-#include <cassert>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
+
+#ifndef LOCAL
+    #define dbg(...) (void(0))
+#endif
+
+#define fn auto
+using i32 = int32_t;
+using u32 = uint32_t;
+using i64 = int64_t;
+using u64 = uint64_t;
+template<class T> using vec = vector<T>;
 
 // clang-format off
 struct XorTree {
@@ -44,3 +54,33 @@ struct XorTree {
   private: vector<int> deg;
 };
 // clang-format on
+
+fn solve() {
+    i32 n;
+    cin >> n;
+    XorTree t(n);
+    for (i32 i = 0, u, v; i < n - 1; i++) {
+        cin >> u >> v;
+        t.add_edge(u - 1, v - 1);
+    }
+    i32 cnt = 0;
+    vec<char> use(n);
+    t.set_root(0);
+    t.run(
+        [&](i32 p, i32 v) {
+            if (!use[p] && !use[v]) {
+                use[p] = use[v] = 1;
+                cnt++;
+            }
+        },
+        [](i32) {}
+    );
+    cout << cnt << "\n";
+}
+
+fn main() -> i32 {
+    cin.tie(nullptr)->sync_with_stdio(false);
+    int t = 1;
+    // cin >> t;
+    while (t--) solve();
+}
