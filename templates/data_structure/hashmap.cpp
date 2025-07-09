@@ -1,0 +1,130 @@
+#include <cstdint>
+#include <memory>
+#include <random>
+#include <vector>
+using namespace std;
+
+template<class K, class V, int LOAD> struct hash_map_base {
+    using u32 = uint32_t;
+    using u64 = uint64_t;
+    using node = pair<K, V>;
+
+    u32 sz = 0, cap = 8, mask = cap - 1;
+    vector<node> data;
+    vector<bool> used;
+    V def_val;
+
+    hash_map_base() : data(cap), used(cap) {}
+
+    void reserve(int n) { extend(100 * n / LOAD); }
+    int size() const { return sz; }
+    bool empty() const { return sz == 0; }
+    void set_default(V v) { def_val = v; }
+
+    V &operator[](const K &k) {
+        u32 hash = chash(k);
+        for (;;) {
+            if (!used[hash]) {
+                if (100 * sz >= LOAD * cap) {
+                    extend(cap + 1);
+                    return (*this)[k];
+                }
+                sz++;
+                data[hash] = {k, def_val};
+                used[hash] = true;
+                return data[hash].second;
+            }
+            if (data[hash].first == k) return data[hash].second;
+            ++hash &= mask;
+        }
+    }
+    void emplace(const K &k, const V &v) { (*this)[k] = v; }
+    void erase(const K &k) {
+        u32 hash = chash(k);
+        for (;;) {
+            if (!used[hash]) return;
+            if (data[hash].first == k) {
+                sz--;
+                used[hash] = false;
+                ++hash &= mask;
+                for (; used[hash]; ++hash &= mask) {
+                    auto [tmp_k, tmp_v] = data[hash];
+                    sz--;
+                    used[hash] = false;
+                    (*this)[tmp_k] = tmp_v;
+                }
+                return;
+            }
+            ++hash &= mask;
+        }
+    }
+    V *find(const K &k) {
+        u32 hash = chash(k);
+        for (;;) {
+            if (!used[hash]) return nullptr;
+            if (data[hash].first == k) return &data[hash].second;
+            ++hash &= mask;
+        }
+    }
+
+  private:
+    void extend(int _n) {
+        while (cap < _n) cap *= 2;
+        mask = cap - 1;
+        vector<node> d(cap);
+        vector<bool> u(cap);
+        for (int i = 0; i < used.size(); i++) {
+            if (used[i]) {
+                u32 hash = chash(data[i].first);
+                while (u[hash]) ++hash &= mask;
+                d[hash] = data[i];
+                u[hash] = true;
+            }
+        }
+        data.swap(d), used.swap(u);
+    }
+    u32 chash(const K &k) {
+        static const u64 a = mt19937_64((u64)make_unique<char>().get())() | 1;
+        return u32(a * hash<K>{}(k) >> 32) & mask;
+    }
+};
+template<class K, class V, int LOAD = 75>
+struct hash_map : hash_map_base<K, V, LOAD> {
+    using base = hash_map_base<K, V, LOAD>;
+    struct iter {
+        hash_map &hm;
+        int p;
+        iter(hash_map &_hm, int _p) : hm(_hm), p(_p) {
+            while (p < hm.cap && !hm.used[p]) p++;
+        }
+        bool operator!=(const iter &o) const { return p != o.p; }
+        void operator++() {
+            p++;
+            while (p < hm.cap && !hm.used[p]) p++;
+        }
+        pair<K, V> &operator*() { return hm.data[p]; }
+    };
+    iter begin() { return {*this, 0}; }
+    iter end() { return {*this, (int)base::cap}; }
+};
+template<class K, int LOAD = 75>
+struct hash_set : hash_map_base<K, char, LOAD> {
+    using base = hash_map_base<K, char, LOAD>;
+    struct iter {
+        hash_set &hs;
+        int p;
+        iter(hash_set &_mp, int _p) : hs(_mp), p(_p) {
+            while (p < hs.cap && !hs.used[p]) p++;
+        }
+        bool operator!=(const iter &o) const { return p != o.p; }
+        void operator++() {
+            p++;
+            while (p < hs.cap && !hs.used[p]) p++;
+        }
+        const K &operator*() { return hs.keys[p]; }
+    };
+    iter begin() { return {*this, 0}; }
+    iter end() { return {*this, (int)base::cap}; }
+    void insert(const K &k) { base::emplace(k, 0); }
+    int count(const K &k) { return find(k) != nullptr; }
+};

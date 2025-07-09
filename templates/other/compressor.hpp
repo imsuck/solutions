@@ -15,6 +15,7 @@ template<class T = int> struct Compressor {
             if (og.empty() || og.back() != x) id++, og.push_back(x);
             x.get() = id;
         }
+        og.shrink_to_fit();
     }
     int size() const { return int(og.size()); }
     T operator[](int i) const { return og[i]; }
