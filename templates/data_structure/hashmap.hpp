@@ -21,25 +21,23 @@ template<class K, class V, int LOAD> struct hash_map_base {
     bool empty() const { return sz == 0; }
     void set_default(V v) { def_val = v; }
 
-    V &operator[](const K &k) {
+    V &operator[](const K &k) { return *emplace(k, def_val); }
+    V *emplace(const K &k, const V &v) {
         u32 hash = chash(k);
         for (;;) {
             if (!used[hash]) {
                 if (100 * sz >= LOAD * cap) {
                     extend(cap + 1);
-                    return (*this)[k];
+                    return emplace(k, v);
                 }
                 sz++;
-                data[hash] = {k, def_val};
+                data[hash] = {k, v};
                 used[hash] = true;
-                return data[hash].second;
+                return &data[hash].second;
             }
-            if (data[hash].first == k) return data[hash].second;
+            if (data[hash].first == k) return &data[hash].second;
             ++hash &= mask;
         }
-    }
-    void emplace(const K &k, const V &v) {
-        if (!find(k)) (*this)[k] = v;
     }
     void erase(const K &k) {
         u32 hash = chash(k);
@@ -53,7 +51,7 @@ template<class K, class V, int LOAD> struct hash_map_base {
                     auto [tmp_k, tmp_v] = data[hash];
                     sz--;
                     used[hash] = false;
-                    (*this)[tmp_k] = tmp_v;
+                    emplace(tmp_k, tmp_v);
                 }
                 return;
             }
@@ -109,9 +107,10 @@ struct hash_map : hash_map_base<K, V, LOAD> {
     iter begin() { return {*this, 0}; }
     iter end() { return {*this, (int)base::cap}; }
 };
+struct _null_type {};
 template<class K, int LOAD = 75>
-struct hash_set : hash_map_base<K, char, LOAD> {
-    using base = hash_map_base<K, char, LOAD>;
+struct hash_set : hash_map_base<K, _null_type, LOAD> {
+    using base = hash_map_base<K, _null_type, LOAD>;
     struct iter {
         hash_set &hs;
         int p;
@@ -127,6 +126,6 @@ struct hash_set : hash_map_base<K, char, LOAD> {
     };
     iter begin() { return {*this, 0}; }
     iter end() { return {*this, (int)base::cap}; }
-    void insert(const K &k) { base::emplace(k, 0); }
-    int count(const K &k) { return find(k) != nullptr; }
+    void insert(const K &k) { base::emplace(k, {}); }
+    int count(const K &k) { return base::find(k) != nullptr; }
 };
