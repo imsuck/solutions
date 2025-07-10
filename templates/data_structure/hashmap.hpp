@@ -38,7 +38,9 @@ template<class K, class V, int LOAD> struct hash_map_base {
             ++hash &= mask;
         }
     }
-    void emplace(const K &k, const V &v) { (*this)[k] = v; }
+    void emplace(const K &k, const V &v) {
+        if (!find(k)) (*this)[k] = v;
+    }
     void erase(const K &k) {
         u32 hash = chash(k);
         for (;;) {
