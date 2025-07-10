@@ -2,7 +2,7 @@
 using namespace std;
 
 template<class T> void multiple_fzt(vector<T> &a) {
-    const int n = int(a.size());
+    const int n = a.size();
     vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;
@@ -13,7 +13,7 @@ template<class T> void multiple_fzt(vector<T> &a) {
     }
 }
 template<class T> void multiple_fmt(vector<T> &a) {
-    const int n = int(a.size());
+    const int n = a.size();
     vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;
@@ -24,7 +24,7 @@ template<class T> void multiple_fmt(vector<T> &a) {
     }
 }
 template<class T> void divisor_fzt(vector<T> &a) {
-    const int n = int(a.size());
+    const int n = a.size();
     vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;
@@ -35,7 +35,7 @@ template<class T> void divisor_fzt(vector<T> &a) {
     }
 }
 template<class T> void divisor_fmt(vector<T> &a) {
-    const int n = int(a.size());
+    const int n = a.size();
     vector<char> sieve(n, true);
     for (int p = 2; p < n; p += 1 + p % 2) {
         if (!sieve[p]) continue;

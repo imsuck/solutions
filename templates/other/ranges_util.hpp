@@ -7,7 +7,7 @@ template<class T> struct rev_t {
         void operator++() { p--; }
         typename T::value_type &operator*() { return cont[p]; }
     };
-    iterator begin() { return {cont, int(cont.size()) - 1}; }
+    iterator begin() { return {cont, cont.size() - 1}; }
     iterator end() { return {cont, -1}; }
 };
 template<class T> struct crev_t {
@@ -19,7 +19,7 @@ template<class T> struct crev_t {
         void operator++() { p--; }
         const typename T::value_type &operator*() { return cont[p]; }
     };
-    iterator begin() { return {cont, int(cont.size()) - 1}; }
+    iterator begin() { return {cont, cont.size() - 1}; }
     iterator end() { return {cont, -1}; }
 };
 template<class T> rev_t<T> rev(T &a) { return {a}; }

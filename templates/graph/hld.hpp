@@ -8,7 +8,7 @@ struct HLD {
 
     template<class G>
     HLD(G &g, int root = 0) :
-        n(int(g.size())), sz(n, 1), par(n), in(n), out(n), hs(n) {
+        n(g.size()), sz(n, 1), par(n), in(n), out(n), hs(n) {
         dfs_sz(g, root);
         dfs_hld(g, root);
         assert(time == n);

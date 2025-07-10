@@ -9,8 +9,8 @@ template<class T> struct Dinitz {
     Dinitz(int n) : g(n), lvl(n), iter(n) {}
 
     void add_edge(int u, int v, T cap, T rcap = 0) {
-        g[u].push_back({v, int(g[v].size()), cap});
-        g[v].push_back({u, int(g[u].size() - 1), rcap});
+        g[u].push_back({v, g[v].size(), cap});
+        g[v].push_back({u, g[u].size() - 1, rcap});
     }
 
     T max_flow(int s, int t) {

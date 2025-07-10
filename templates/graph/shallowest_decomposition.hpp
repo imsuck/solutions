@@ -7,7 +7,7 @@ template<class G> pair<G, int> shallowest_decomp(const G &g) {
     auto clz = [](uint32_t x) { return x ? __builtin_clz(x) : 32; };
     auto ctz = [](uint32_t x) { return x ? __builtin_ctz(x) : 32; };
     auto bw = [&](uint32_t x) { return clz(0) - clz(x); };
-    const int n = int(g.size());
+    const int n = g.size();
     G tree(n), st(bw(n));
 
     auto chain = [&](int labels, int v) {
@@ -31,7 +31,7 @@ template<class G> pair<G, int> shallowest_decomp(const G &g) {
         forbid[v] = once | ((1 << bw(twice)) - 1);
         int label = ctz(forbid[v] + 1);
         st[label].push_back(v);
-        for (int i = int(g[v].size()) - 1; i >= 0; i--) {
+        for (int i = g[v].size() - 1; i >= 0; i--) {
             int c = g[v][i];
             chain((forbid[c] + 1) & ((1 << label) - 1), v);
         }

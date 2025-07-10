@@ -17,7 +17,7 @@ struct RollingHash {
     RollingHash(const vector<T> &v, u64 _base) noexcept :
         base(_base), hashes(v.size() + 1), power(v.size() + 1) {
         power[0] = 1;
-        for (int i = 0; i < int(v.size()); i++) {
+        for (int i = 0; i < v.size(); i++) {
             power[i + 1] = mul(power[i], base);
             hashes[i + 1] = add(mul(hashes[i], base), v[i]);
         }

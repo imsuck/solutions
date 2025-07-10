@@ -11,7 +11,7 @@ template<class T, bool auto_resize = true> struct ptr32 {
             p = del.back(), del.pop_back();
             *p = T(forward<Args>(args)...);
         } else {
-            p.p = int(pool.size());
+            p.p = pool.size();
             pool.emplace_back(forward<Args>(args)...);
         }
         return p;

@@ -23,7 +23,7 @@ using i64 = int64_t;
 using u64 = uint64_t;
 using str = string;
 template<class T> using vec = vector<T>;
-template<class Con> inline int len(const Con &c) { return int(c.size()); }
+template<class Con> inline int len(const Con &c) { return c.size(); }
 #define all(a) begin(a), end(a)
 #define pb push_back
 #define eb emplace_back

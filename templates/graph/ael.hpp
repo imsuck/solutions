@@ -14,7 +14,7 @@ template<class E> struct AEL {
     int size() const { return n; }
 
     void add_edge(int u, const E &e) {
-        edges.emplace_back(e, head[u]), head[u] = int(edges.size()) - 1;
+        edges.emplace_back(e, head[u]), head[u] = edges.size() - 1;
     }
 
     struct range {

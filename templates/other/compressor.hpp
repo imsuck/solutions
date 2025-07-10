@@ -17,7 +17,7 @@ template<class T = int> struct Compressor {
         }
         og.shrink_to_fit();
     }
-    int size() const { return int(og.size()); }
+    int size() const { return og.size(); }
     T operator[](int i) const { return og[i]; }
     int operator()(T x) const { return int(lower_bound(begin(og), end(og), x) - begin(og)); }
     bool find(T x) const { return binary_search(begin(og), end(og), x); }

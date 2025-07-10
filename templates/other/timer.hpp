@@ -1,43 +1,23 @@
 #include <chrono>
+#include <iostream>
+#include <map>
+#include <string>
 using namespace std;
 
-#if false
-using namespace chrono;
-struct Timer {
-    string _msg;
-    time_point<steady_clock> start = steady_clock::now(), end;
-    void stop() { end = steady_clock::now(); }
-    Timer() = default;
-    Timer(const string &msg) : _msg(msg + ": ") {}
-    ~Timer() {
-    #ifdef LOCAL
-        stop(), cerr << _msg << (end - start) / 1ms << "ms\n";
-    #endif
-    }
-};
-#endif
+namespace timer {
+    using namespace chrono;
+    static auto last = steady_clock::now();
+    map<string, uint64_t> comp;
+    template<bool final = false>
+    void add([[maybe_unused]] string const &msg = "") {
+#ifdef LOCAL
+        auto now = steady_clock::now();
+        auto delta = duration_cast<microseconds>(now - last).count();
+        last = now;
+        if (msg.size() && !final) comp[msg] += delta;
 
-#if true
-using namespace chrono;
-template<class Fn> struct Timer {
-    Fn fn;
-    time_point<steady_clock> start = steady_clock::now(), end;
-    bool done = false;
-    void stop() { end = steady_clock::now(), done = true; }
-    Timer(Fn f) : fn(f) {}
-    void display() {
-        stop();
-    #ifdef LOCAL
-        fn(end - start), cout << flush;
-    #endif
-    }
-    #ifdef LOCAL
-    ~Timer() {
-        end = max(steady_clock::now(), end);
-        if (done) return;
-        fn(end - start), cout << flush;
-    }
-    #endif
-};
+        if (final)
+            for (auto &[k, v] : comp) cerr << k << ": " << v * 1e-3L << " ms\n";
 #endif
-template<class Fn> Timer<Fn> make_timer(const Fn &&fn) { return {fn}; }
+    }
+} // namespace timer
