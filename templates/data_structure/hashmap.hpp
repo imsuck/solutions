@@ -127,5 +127,8 @@ struct hash_set : hash_map_base<K, _null_type, LOAD> {
     iter begin() { return {*this, 0}; }
     iter end() { return {*this, (int)base::cap}; }
     void insert(const K &k) { base::emplace(k, {}); }
+    template<class... Ts> void emplace(Ts &&...x) {
+        base::emplace({forward<Ts>(x)...}, {});
+    }
     int count(const K &k) { return base::find(k) != nullptr; }
 };

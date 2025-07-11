@@ -4,11 +4,11 @@ using namespace std;
 
 struct HLD {
     int n;
-    vector<int> sz, par, in, out, hs;
+    vector<int> par, in, out, hs;
 
     template<class G>
     HLD(G &g, int root = 0) :
-        n(g.size()), sz(n, 1), par(n), in(n), out(n), hs(n) {
+        n(g.size()), par(n), in(n), out(n), hs(n) {
         dfs_sz(g, root);
         dfs_hld(g, root);
         assert(time == n);
@@ -36,15 +36,16 @@ struct HLD {
 
   private:
     int time = 0;
-    template<class G> void dfs_sz(G &g, int v, int p = -1) {
+    template<class G> int dfs_sz(G &g, int v, int p = -1) {
         par[v] = p;
-        if (g[v].size() && g[v][0] == p) swap(g[v][0], g[v].back());
+        int sz = 1, mx = 0;
         for (int &c : g[v]) {
             if (c == p) continue;
-            dfs_sz(g, c, v);
-            sz[v] += sz[c];
-            if (sz[g[v][0]] < sz[c]) swap(g[v][0], c);
+            int s = dfs_sz(g, c, v);
+            sz += s;
+            if (g[v][0] == p || mx < s) mx = s, swap(g[v][0], c);
         }
+        return sz;
     }
     template<class G> void dfs_hld(G &g, int v, int p = -1) {
         in[v] = time++;
