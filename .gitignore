@@ -4,5 +4,6 @@ testing.cpp
 
 stress_testing/*
 !stress_testing/*.cpp
+!stress_testing/*.hpp
 !stress_testing/makefile
 **/*.gch

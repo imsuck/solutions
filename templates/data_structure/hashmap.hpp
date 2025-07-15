@@ -4,7 +4,7 @@
 #include <vector>
 using namespace std;
 
-template<class K, class V, int LOAD> struct hash_map_base {
+template<class K, class V, class Hash, int LOAD> struct hash_map_base {
     using u32 = uint32_t;
     using u64 = uint64_t;
     using node = pair<K, V>;
@@ -85,12 +85,12 @@ template<class K, class V, int LOAD> struct hash_map_base {
     }
     u32 chash(const K &k) {
         static const u64 a = mt19937_64((u64)make_unique<char>().get())() | 1;
-        return u32(a * hash<K>{}(k) >> 32) & mask;
+        return u32(a * Hash{}(k) >> 32) & mask;
     }
 };
-template<class K, class V, int LOAD = 75>
-struct hash_map : hash_map_base<K, V, LOAD> {
-    using base = hash_map_base<K, V, LOAD>;
+template<class K, class V, class Hash = hash<K>, int LOAD = 75>
+struct hash_map : hash_map_base<K, V, Hash, LOAD> {
+    using base = hash_map_base<K, V, Hash, LOAD>;
     struct iter {
         hash_map &hm;
         int p;
@@ -108,9 +108,9 @@ struct hash_map : hash_map_base<K, V, LOAD> {
     iter end() { return {*this, (int)base::cap}; }
 };
 struct _null_type {};
-template<class K, int LOAD = 75>
-struct hash_set : hash_map_base<K, _null_type, LOAD> {
-    using base = hash_map_base<K, _null_type, LOAD>;
+template<class K, class Hash = hash<K>, int LOAD = 75>
+struct hash_set : hash_map_base<K, _null_type, Hash, LOAD> {
+    using base = hash_map_base<K, _null_type, Hash, LOAD>;
     struct iter {
         hash_set &hs;
         int p;
@@ -122,7 +122,7 @@ struct hash_set : hash_map_base<K, _null_type, LOAD> {
             p++;
             while (p < hs.cap && !hs.used[p]) p++;
         }
-        const K &operator*() { return hs.keys[p]; }
+        const K &operator*() { return hs.data[p].first; }
     };
     iter begin() { return {*this, 0}; }
     iter end() { return {*this, (int)base::cap}; }
@@ -130,5 +130,4 @@ struct hash_set : hash_map_base<K, _null_type, LOAD> {
     template<class... Ts> void emplace(Ts &&...x) {
         base::emplace({forward<Ts>(x)...}, {});
     }
-    int count(const K &k) { return base::find(k) != nullptr; }
 };

@@ -1,5 +1,5 @@
 SANITIZER = -fsanitize=undefined,address
-CFLAGS = -include ../lib/debug/debug.hpp -std=c++17 -DLOCAL -g
+CFLAGS = -include ../lib/debug/debug.hpp -g -std=c++17 -DLOCAL -D_GLIBCXX_NO_ASSERTIONS
 
 build: a.o safe.o tester.o
 	g++ $(SANITIZER) a.o -o a.out
@@ -21,6 +21,11 @@ rerun: build run
 manual:
 	watchexec -e inp "./a.out <a.inp >a.output; ./safe.out <a.inp >a.ans; diff a.output a.ans"
 
+clean:
+	rm *.o
+	rm a.out
+	rm safe.out
+	rm tester
 
 a.o: a.cpp
 	@g++ -include ../bits/stdc++.h $(CFLAGS) $(SANITIZER) a.cpp -c -o a.o

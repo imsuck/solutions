@@ -1,28 +1,22 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-mt19937 mt;
-template<class T> T rand(T l, T r) {
-    assert(l <= r);
-    return uniform_int_distribution<T>{l, r}(mt);
-}
+#include "libgen.hpp"
+
+Gen gen;
 
 void gen_test() {
     ofstream cout("a.inp");
-    auto print = [&](auto &&...xs) { ((cout << xs << " "), ...); };
+    auto print = [&](auto &&...xs) { ((cerr << xs << " "), ...); };
     [[maybe_unused]]
-    auto println = [&](auto &&...xs) { print(xs...), cout << "\n"; };
+    auto println = [&](auto &&...xs) { print(xs...), cerr << "\n"; };
 
-    const int n = rand<int>(3, 3), q = rand<int>(1, 1);
-    println(n, q);
-    for (int i = 0; i < n; i++) cout << rand<int>(1, 2) << " \n"[i == n - 1];
+    // const int n = gen.unif<int>(1, 1e8);
+    // println(n);
 
-    for (int _ = 0; _ < q; _++) {
-        int l = rand<int>(1, n), r = rand<int>(1, n);
-        if (l > r) swap(l, r);
-        int x = rand<int>(-1, 1);
-        println(l, r, x);
-    }
+    int n = 20;
+    auto tree = gen.tree(n);
+    for (auto [u, v] : tree) println(u, v);
 }
 
 int main(int argc, char *argv[]) {
@@ -33,7 +27,7 @@ int main(int argc, char *argv[]) {
 
     const int seed = atoi(argv[1]);
     const int cnt = atoi(argv[2]);
-    mt = mt19937(seed);
+    gen = Gen(seed);
 
     for (int i = 1; cnt == -1 || i <= cnt; i++) {
         gen_test();
