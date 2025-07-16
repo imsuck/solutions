@@ -11,7 +11,7 @@ template<class M> struct SegTree {
 
     SegTree() = default;
     SegTree(int _n) : n(_n), m(bit_ceil(n)), t(2 * m, M::id()) {}
-    template<class V> SegTree(const V &v) : SegTree(v.size()) {
+    template<class V> SegTree(const V &v) : SegTree((int)v.size()) {
         copy(begin(v), end(v), begin(t) + m);
         for (int i = m; --i;) update(i);
     }

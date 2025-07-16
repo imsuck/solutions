@@ -7,9 +7,9 @@ Gen gen;
 
 void gen_test() {
     ofstream cout("a.inp");
-    auto print = [&](auto &&...xs) { ((cerr << xs << " "), ...); };
+    auto print = [&](auto &&...xs) { ((cout << xs << " "), ...); };
     [[maybe_unused]]
-    auto println = [&](auto &&...xs) { print(xs...), cerr << "\n"; };
+    auto println = [&](auto &&...xs) { print(xs...), cout << "\n"; };
 
     // const int n = gen.unif<int>(1, 1e8);
     // println(n);

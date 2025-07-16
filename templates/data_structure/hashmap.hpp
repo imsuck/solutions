@@ -4,29 +4,30 @@
 #include <vector>
 using namespace std;
 
-template<class K, class V, class Hash, int LOAD> struct hash_map_base {
+template<class K, class V, class Hash> struct hash_map_base {
     using u32 = uint32_t;
     using u64 = uint64_t;
     using node = pair<K, V>;
 
-    u32 sz = 0, cap = 8, mask = cap - 1;
+    u32 sz = 0, cap = 8, mask = cap - 1, load = 75;
     vector<node> data;
     vector<bool> used;
     V def_val;
 
     hash_map_base() : data(cap), used(cap) {}
 
-    void reserve(int n) { extend(100 * n / LOAD); }
+    void reserve(int n) { extend(100 * n / load); }
     int size() const { return sz; }
     bool empty() const { return sz == 0; }
     void set_default(V v) { def_val = v; }
+    void set_load_factor(u32 nload) { load = nload; }
 
     V &operator[](const K &k) { return *emplace(k, def_val); }
     V *emplace(const K &k, const V &v) {
         u32 hash = chash(k);
         for (;;) {
             if (!used[hash]) {
-                if (100 * sz >= LOAD * cap) {
+                if (100 * sz >= load * cap) {
                     extend(cap + 1);
                     return emplace(k, v);
                 }
@@ -88,9 +89,9 @@ template<class K, class V, class Hash, int LOAD> struct hash_map_base {
         return u32(a * Hash{}(k) >> 32) & mask;
     }
 };
-template<class K, class V, class Hash = hash<K>, int LOAD = 75>
-struct hash_map : hash_map_base<K, V, Hash, LOAD> {
-    using base = hash_map_base<K, V, Hash, LOAD>;
+template<class K, class V, class Hash = hash<K>>
+struct hash_map : hash_map_base<K, V, Hash> {
+    using base = hash_map_base<K, V, Hash>;
     struct iter {
         hash_map &hm;
         int p;
@@ -108,9 +109,9 @@ struct hash_map : hash_map_base<K, V, Hash, LOAD> {
     iter end() { return {*this, (int)base::cap}; }
 };
 struct _null_type {};
-template<class K, class Hash = hash<K>, int LOAD = 75>
-struct hash_set : hash_map_base<K, _null_type, Hash, LOAD> {
-    using base = hash_map_base<K, _null_type, Hash, LOAD>;
+template<class K, class Hash = hash<K>>
+struct hash_set : hash_map_base<K, _null_type, Hash> {
+    using base = hash_map_base<K, _null_type, Hash>;
     struct iter {
         hash_set &hs;
         int p;
