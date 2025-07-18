@@ -3,7 +3,7 @@
 #include <map>
 using namespace std;
 
-template<class> struct st_alloc {};
+#include "../other/st_alloc.hpp"
 
 namespace _ETT {
     struct node;

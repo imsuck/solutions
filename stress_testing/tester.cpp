@@ -32,15 +32,15 @@ int main(int argc, char *argv[]) {
     for (int i = 1; cnt == -1 || i <= cnt; i++) {
         gen_test();
         auto st = chrono::steady_clock::now();
-        system("./a.out <a.inp >a.output");
+        bool ng = system("./a.out <a.inp >a.output");
         auto dur = chrono::duration_cast<chrono::milliseconds>(
             chrono::steady_clock::now() - st
         );
-        system("./safe.out <a.inp >a.ans");
+        ng |= system("./safe.out <a.inp >a.ans");
 
         this_thread::sleep_for(20ms); // wait for files to finish writing
-        if (system("diff a.output a.ans") != 0) {
-            cout << "Test " << i << ": NG" << endl;
+        if (ng || system("diff a.output a.ans") != 0) {
+            cout << "Test " << i << ": NG " << (ng ? "(RTE)" : "(WA)") << endl;
             return 1;
         }
         cout << "Test " << i << ": OK, Time: " << dur.count() << "ms" << endl;

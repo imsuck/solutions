@@ -98,7 +98,7 @@ namespace libgen {
             for (int v : prufer) deg[v]++;
             std::vector<std::pair<int, int>> edges;
             edges.reserve(n - 1);
-            for (int i = 0, j = 0; i < n && j < n - 2; i++) {
+            for (int i = 0, j = 0; i < n; i++) {
                 for (int v = i, p; v <= i && deg[v] == 1; v = p) {
                     if (j < n - 2) p = prufer[j++];
                     deg[v]--, deg[p]--;
