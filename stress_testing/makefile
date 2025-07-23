@@ -1,16 +1,22 @@
 .PHONY: r run m manual c clean
 
-SANITIZER = -fsanitize=undefined,address
-CFLAGS = -include ../lib/debug/debug.hpp -g -std=c++17 -DLOCAL -D_GLIBCXX_NO_ASSERTIONS
-
 opt = 0
 seed = 0
 cnt = -1
+dbg = 1
+
+SANITIZER = -fsanitize=undefined,address
+ifeq ($(dbg), 1)
+CFLAGS = -include ../lib/debug/debug.hpp -g -std=c++17 -DLOCAL -D_GLIBCXX_NO_ASSERTIONS
+else ifeq ($(dbg), 0)
+CFLAGS = -g -std=c++17 -D_GLIBCXX_NO_ASSERTIONS
+endif
+
 r run: a.out safe.out tester
 	@echo
 	@./tester $(seed) $(cnt)
 
-m manual:
+m manual: a.out safe.out tester
 	watchexec -e inp "./a.out <a.inp >a.output; ./safe.out <a.inp >a.ans; diff a.output a.ans"
 
 c clean:
@@ -39,4 +45,4 @@ endif
 	@g++ -include ../bits/stdc++.h $(CFLAGS) $(SANITIZER) $< -c -o $@
 
 %2.o: %.cpp
-	@g++ -include ../bits/stdc++.h $(CFLAGS) -O2 $< -c -o $@
+	@g++ $(CFLAGS) -O2 $< -c -o $@

@@ -1,7 +1,7 @@
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstdint>
-#include <iostream>
 #include <memory>
 #include <random>
 #include <set>
@@ -60,7 +60,7 @@ namespace libgen {
             do {
                 a = unif(l, r), b = unif(l, r);
             } while (a == b);
-            if (a > b) swap(a, b);
+            if (a > b) std::swap(a, b);
             return {a, b};
         }
         template<class T, class C> void arr(C &a, T l, T r) {
@@ -94,7 +94,7 @@ namespace libgen {
         }
         std::vector<std::pair<int, int>> tree(size_t n, int id = 0) {
             std::vector<int> prufer(n - 2), deg(n, 1);
-            arr(prufer, 0, int(n) - 1);
+            arr(prufer, 0, (int)n - 1);
             for (int v : prufer) deg[v]++;
             std::vector<std::pair<int, int>> edges;
             edges.reserve(n - 1);
@@ -105,7 +105,28 @@ namespace libgen {
                     if (v != p) edges.emplace_back(v + id, p + id);
                 }
             }
+            shuffle(edges);
+            for (auto &[u, v] : edges)
+                if (unif_bool()) std::swap(u, v);
             return edges;
+        }
+        std::vector<std::pair<int, int>>
+        connected_graph(size_t n, size_t m, int id = 0) {
+            assert(m + 1 >= n);
+            auto graph = tree(n, id);
+            std::set<std::pair<int, int>> s;
+            for (auto [u, v] : graph) s.emplace(std::minmax(u, v));
+            for (int i = (int)n - 1; i < m; i++) {
+                std::pair<int, int> edge;
+                do {
+                    edge = pair(id, (int)n - 1 + id);
+                } while (s.count(edge));
+                s.emplace(edge);
+                if (unif_bool()) std::swap(edge.first, edge.second);
+                graph.emplace_back(edge);
+            }
+            shuffle(graph);
+            return graph;
         }
 
       private:

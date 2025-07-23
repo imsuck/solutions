@@ -1,8 +1,4 @@
-#include <limits>
-#include <queue>
-#include <set>
-#include <stack>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
 // clang-format off
@@ -14,7 +10,6 @@ template<class T> struct Dinitz {
         g[u].push_back({v, (int)g[v].size(), cap});
         g[v].push_back({u, (int)g[u].size() - 1, rcap});
     }
-    auto &operator[](int i) { return g[i]; }
 
     T max_flow(int s, int t) {
         T flow = 0;
@@ -78,3 +73,34 @@ template<class T> struct Dinitz {
     }
 };
 // clang-format on
+
+int main() {
+    cin.tie(nullptr)->sync_with_stdio(false);
+    int n;
+    cin >> n;
+    Dinitz<int> g(2 * n + 2);
+    for (int i = 1; i <= n; i++) {
+        g.add_edge(0, i, 1);
+        g.add_edge(i + n, 2 * n + 1, 1);
+    }
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            char c;
+            cin >> c;
+            if (c == 'o') g.add_edge(i, j + n, 1e5);
+        }
+    }
+    cout << g.max_flow(0, 2 * n + 1) << "\n";
+    auto cut = g.min_cut(0);
+    for (int v : cut) {
+        for (auto &[u, rev, cap] : g.g[v]) {
+            if (!cut.count(u)) {
+                if (v == 0) {
+                    cout << "1 " << u << "\n";
+                } else if (u == 2 * n + 1) {
+                    cout << "2 " << v - n << "\n";
+                }
+            }
+        }
+    }
+}

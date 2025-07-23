@@ -1,6 +1,4 @@
-#include <algorithm>
-#include <string>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
 template<class G> auto find_scc(const G &g) {
@@ -45,4 +43,27 @@ template<class G> auto condense(const G &g) {
         v.erase(unique(begin(v), end(v)), end(v));
     }
     return make_tuple(move(scc), move(rep), move(gd));
+}
+
+int main() {
+    cin.tie(nullptr)->sync_with_stdio(false);
+    int n, m;
+    cin >> n >> m;
+    vector<int> a(n);
+    for (int &i : a) cin >> i;
+    vector<basic_string<int>> g(n);
+    for (int i = 0, u, v; i < m; i++) {
+        cin >> u >> v, u--, v--;
+        g[u] += v;
+    }
+    auto [scc, rep, gd] = condense(g);
+    int k = scc.size();
+    vector<int64_t> dp(k);
+    for (int i = 0; i < n; i++) dp[rep[i]] += a[i];
+    for (int v = k - 1; v >= 0; v--) {
+        int64_t mx = 0;
+        for (int u : gd[v]) mx = max(mx, dp[u]);
+        dp[v] += mx;
+    }
+    cout << *max_element(begin(dp), end(dp)) << "\n";
 }

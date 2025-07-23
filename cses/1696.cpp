@@ -1,8 +1,4 @@
-#include <limits>
-#include <queue>
-#include <set>
-#include <stack>
-#include <vector>
+#include <bits/stdc++.h>
 using namespace std;
 
 // clang-format off
@@ -78,3 +74,20 @@ template<class T> struct Dinitz {
     }
 };
 // clang-format on
+
+int main() {
+    cin.tie(nullptr)->sync_with_stdio(false);
+    int n, m, k;
+    cin >> n >> m >> k;
+    Dinitz<int> g(n + m + 2);
+    for (int i = 1; i <= n; i++) g.add_edge(0, i, 1);
+    for (int i = 1; i <= m; i++) g.add_edge(i + n, n + m + 1, 1);
+    for (int i = 0, a, b; i < k; i++) {
+        cin >> a >> b, b += n;
+        g.add_edge(a, b, 1);
+    }
+    cout << g.max_flow(0, n + m + 1) << "\n";
+    for (int i = 1; i <= n; i++)
+        for (auto &[to, rev, cap] : g[i])
+            if (!cap && i < to) cout << i << " " << to - n << "\n";
+}
