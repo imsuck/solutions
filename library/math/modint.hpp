@@ -5,8 +5,6 @@
 using namespace std;
 
 // clang-format off
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
 template<uint32_t m> struct modint {
     static_assert(m >= 1, "Modulus must be in the range [1;2^31)");
 
@@ -76,5 +74,4 @@ template<uint32_t m> struct modint {
 };
 using modint107 = modint<1'000'000'007>;
 using modint998 = modint<998'244'353>;
-#pragma GCC diagnostic pop
 // clang-format on

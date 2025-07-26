@@ -6,7 +6,7 @@
 using namespace std;
 
 // clang-format off
-template<class T> struct Dinitz {
+template<class T, int K = 31> struct Dinitz {
     Dinitz() {}
     Dinitz(int n) : g(n), lvl(n), iter(n) {}
 
@@ -18,9 +18,11 @@ template<class T> struct Dinitz {
 
     T max_flow(int s, int t) {
         T flow = 0;
-        while (build_dag(s, t)) {
-            fill(begin(iter), end(iter), 0);
-            while (T f = push_flow(s, t, FLOW_INF)) flow += f;
+        for (int k = K; k--;) {
+            while (build_dag(s, t, k)) {
+                fill(begin(iter), end(iter), 0);
+                while (T f = push_flow(s, t, FLOW_INF)) flow += f;
+            }
         }
         return flow;
     }
@@ -48,14 +50,14 @@ template<class T> struct Dinitz {
     vector<vector<Edge>> g;
     vector<int> lvl, iter;
 
-    bool build_dag(int s, int t) {
+    bool build_dag(int s, int t, int k) {
         fill(begin(lvl), end(lvl), -1);
         lvl[s] = 0;
         queue<int> q; q.push(s);
         while (q.size()) {
             int v = q.front(); q.pop();
             for (auto &[to, _rev, cap] : g[v]) {
-                if (lvl[to] == -1 && cap > 0) {
+                if (lvl[to] == -1 && cap >> k) {
                     lvl[to] = lvl[v] + 1;
                     q.push(to);
                 }

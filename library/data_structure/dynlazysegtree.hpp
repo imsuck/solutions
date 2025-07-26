@@ -69,12 +69,9 @@ template<class M, class I = int> struct DynLazySegTree {
             I tm = (tl + tr) / 2;
             if (tm <= l) return self(self, t->r, tm, tr);
             auto lx = self(self, t->l, tl, tm);
-            if (!g(M::op(sm, lx))) {
-                return lx;
-            } else {
-                sm = M::op(sm, lx);
-                return self(self, t->r, tm, tr);
-            }
+            if (!g(M::op(sm, lx))) return lx;
+            sm = M::op(sm, lx);
+            return self(self, t->r, tm, tr);
         };
         rec(rec, root, 0, n);
         return r;

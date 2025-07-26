@@ -8,8 +8,6 @@ using u32 = uint32_t;
 using u64 = uint64_t;
 
 // clang-format off
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
 struct BitVec {
     BitVec() = default;
     explicit BitVec(int n, const vector<bool> &a) :
@@ -55,8 +53,7 @@ struct WaveletMatrix {
         WaveletMatrix(a.size(), [&](int i) { return a[i]; }) {}
     template<class Gen> WaveletMatrix(int _n, Gen gen) : n(_n) {
         vector<T> a(n), l(n), r(n);
-        for (int i = 0; i < n; i++)
-            a[i] = gen(i);
+        for (int i = 0; i < n; i++) a[i] = gen(i);
         for (int lg = bit_num - 1; lg >= 0; lg--) {
             bv[lg] = BitVec(n, [&](int i) { return a[i] >> lg & 1; });
             int li = 0, ri = 0;
@@ -114,5 +111,4 @@ struct WaveletMatrix {
         r = b * mid[lg] + bv[lg].rank(b, r);
     }
 };
-#pragma GCC diagnostic pop
 // clang-format on
