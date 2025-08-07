@@ -3,6 +3,7 @@ a.inp
 testing.cpp
 
 stress_testing/*
+!stress_testing/lib/
 !stress_testing/*.cpp
 !stress_testing/*.hpp
 !stress_testing/makefile
