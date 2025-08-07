@@ -12,7 +12,7 @@ template<class K, class V, class Hash> struct hash_map_base {
     u32 sz = 0, cap = 8, mask = cap - 1, load = 75;
     vector<node> data;
     vector<bool> used;
-    V def_val;
+    V def_val{};
 
     hash_map_base() : data(cap), used(cap) {}
 
