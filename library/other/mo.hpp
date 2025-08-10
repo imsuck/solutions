@@ -13,7 +13,7 @@ struct Mo {
     int l = 0, r = 0;
 
     Mo(int n, const vector<pair<int, int>> &_qs) :
-        q(_qs.size()), B(blk_sz(n, q)), qi(q), qs(_qs) {
+        q((int)_qs.size()), B(blk_sz(n, q)), qi(q), qs(_qs) {
         iota(begin(qi), end(qi), 0);
         sort(begin(qi), end(qi), [&](int i, int j) {
             auto [li, ri] = qs[i];

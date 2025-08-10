@@ -12,7 +12,7 @@ template<int LG> struct MoOnTree {
     MoOnTree() {}
     template<class G>
     MoOnTree(G &g, int q, int root = 0) :
-        n(g.size()), in(n), out(n), tour(2 * n), w(q), qs(q) {
+        n((int)g.size()), in(n), out(n), tour(2 * n), w(q), qs(q) {
         up.fill(vector<int>(n, -1));
         int t = 0;
         auto dfs = [&](auto &self, int v, int p = -1) -> void {

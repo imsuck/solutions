@@ -97,7 +97,7 @@ template<class M> struct LazyETT {
     }
 
     LazyETT(int n) : edges(n) {}
-    LazyETT(const vector<T> &val) : LazyETT(val.size()) {
+    LazyETT(const vector<T> &val) : LazyETT((int)val.size()) {
         for (int i = 0; i < val.size(); i++)
             vert(i)->val = vert(i)->sm = val[i];
     }

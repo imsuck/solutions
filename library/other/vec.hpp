@@ -3,7 +3,6 @@
 using namespace std;
 
 // Silly std::vector wrapper I wrote for fun
-// clang-format off
 template<class T> struct Vec {
     Vec() = default;
     Vec(int n) : v(n) {}
@@ -23,14 +22,13 @@ template<class T> struct Vec {
     Vec<U> map() const {
         vector<U> a;
         a.reserve(v.size());
-        for (int i = 0; i < size(); i++)  a.push_back(U(move(v[i])));
+        for (int i = 0; i < size(); i++) a.push_back(U(move(v[i])));
         return Vec<U>(move(a));
     }
     template<class F> Vec<T> filter(F &&f) {
         vector<T> a;
         for (int i = 0; i < size(); i++)
-            if (f(v[i]))
-                a.push_back(move(v[i]));
+            if (f(v[i])) a.push_back(move(v[i]));
         return v.swap(a), move(*this);
     }
     template<class F> Vec<T> for_each(F &&f) {
@@ -73,4 +71,3 @@ template<class T> struct Vec {
   private:
     vector<T> v;
 };
-// clang-format on

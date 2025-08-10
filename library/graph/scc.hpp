@@ -4,7 +4,7 @@
 using namespace std;
 
 template<class G> auto find_scc(const G &g) {
-    int n = g.size();
+    int n = (int)g.size();
     vector<int> val(n), z;
     vector<char> added(n);
     vector<basic_string<int>> scc;
@@ -32,7 +32,7 @@ template<class G> auto find_scc(const G &g) {
 }
 template<class G> auto condense(const G &g) {
     auto scc = find_scc(g);
-    int n = scc.size();
+    int n = (int)scc.size();
     vector<int> rep(g.size());
     for (int i = 0; i < n; i++)
         for (auto v : scc[i]) rep[v] = i;

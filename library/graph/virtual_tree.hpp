@@ -17,7 +17,7 @@ struct VirtualTree {
             return hld.in[p] <= hld.in[v] && hld.out[v] <= hld.out[p];
         };
         auto cmp = [&](int u, int v) { return hld.in[u] < hld.in[v]; };
-        int k = vs.size();
+        int k = (int)vs.size();
         sort(begin(vs), end(vs), cmp);
         for (int i = 1; i < k; i++) vs.push_back(hld.lca(vs[i - 1], vs[i]));
         sort(begin(vs), end(vs), cmp);

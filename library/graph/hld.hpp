@@ -7,7 +7,7 @@ struct HLD {
     vector<int> par, in, out, hs;
 
     template<class G>
-    HLD(G &g, int root = 0) : n(g.size()), par(n), in(n), out(n), hs(n) {
+    HLD(G &g, int root = 0) : n((int)g.size()), par(n), in(n), out(n), hs(n) {
         hs[root] = root;
         dfs_sz(g, root);
         dfs_hld(g, root);

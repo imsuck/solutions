@@ -17,7 +17,7 @@ template<int id = 0> struct dynmodint {
     }
     static constexpr uint32_t mod() noexcept { return m; }
     constexpr dynmodint() noexcept = default;
-    constexpr dynmodint(int64_t v) noexcept : _v((v %= m) < 0 ? v + m : v) {}
+    constexpr dynmodint(int64_t v) noexcept : _v(uint32_t((v %= m) < 0 ? v + m : v)) {}
     constexpr static mint raw(uint32_t v) noexcept { mint x; return x._v = v, x; }
     template<class T> constexpr explicit operator T() const noexcept { return _v; }
 

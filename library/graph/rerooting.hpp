@@ -42,7 +42,7 @@ template<class M> struct Rerooting {
             if (c == p) continue;
             ds.push_back(apply_edge(dp_sub[c], v, c, cost));
         }
-        int n = ds.size();
+        int n = (int)ds.size();
         vector head(n + 1, M::id()), tail(n + 1, M::id());
         for (int i = 0; i < n; i++) head[i + 1] = M::op(head[i], ds[i]);
         for (int i = n; i--;) tail[i] = M::op(ds[i], tail[i + 1]);

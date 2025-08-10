@@ -44,7 +44,7 @@ template<class Int> struct sbt_node {
 
     static sbt_node lca(const sbt_node &a, const sbt_node &b) {
         const sbt_path &pa = a.path(), &pb = b.path();
-        const int k = min(pa.size(), pb.size());
+        const int k = (int)min(pa.size(), pb.size());
         sbt_node c;
         for (int i = 0; i < k; i++) {
             if (pa[i] == pb[i]) {

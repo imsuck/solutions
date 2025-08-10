@@ -3,7 +3,7 @@ using namespace std;
 
 template<class G>
 tuple<vector<int>, vector<int>, vector<int>> centroid_decomp(const G &g) {
-    const int N = g.size();
+    const int N = (int)g.size();
     vector<int> sz(N), lvl(N, -1), sz_comp(N), par(N);
 
     auto dfs_sz = [&](auto &dfs, int v, int p) -> int {

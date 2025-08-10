@@ -4,7 +4,7 @@ using namespace std;
 template<class E> struct CSR {
     CSR() {}
     CSR(int _n, const vector<pair<int, E>> &_edges) :
-        n(_n), start(n + 1), edges(_edges.size()) {
+        n(_n), start(n + 1), edges((int)_edges.size()) {
         for (auto &[from, _] : _edges) start[from + 1]++;
         for (int i = 1; i <= n; i++) start[i] += start[i - 1];
         auto cnt = start;

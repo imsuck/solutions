@@ -4,7 +4,7 @@ using namespace std;
 
 template<class M> struct DisjointSparseTable {
     using T = typename M::T;
-    DisjointSparseTable(const vector<T> &v) : n(v.size()) {
+    DisjointSparseTable(const vector<T> &v) : n((int)v.size()) {
         t.push_back(v);
         for (int p = 1; 1 << p < n; p++) {
             t.emplace_back(n);
