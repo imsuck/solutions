@@ -1,113 +1,80 @@
-#include <utility>
-#include <vector>
-using namespace std;
+#pragma once
 
-#include "../other/st_alloc.hpp"
-
-#define l ch[0]
-#define r ch[1]
-template<class M> struct LCT {
-    using T = typename M::T;
-
-    struct node;
+template<class node> struct LCT {
     using ptr = node *;
-    struct node : st_alloc<node> {
-        node(int i = -1) : id(i) {}
-        static inline node nil{};
-        ptr p = &nil, ch[2]{&nil, &nil};
-        T val = M::id(), path = M::id();
-        T heavy = M::id(), light = M::id();
-        bool rev = 0;
-        int id;
+    vector<node> nodes;
 
-        T sum() { return M::op(heavy, light); }
+    LCT(int n = 0) {
+        nodes.reserve(n);
+        for (int i = 0; i < n; i++) nodes.emplace_back(i);
+    }
 
-        void pull() {
-            path = M::op(M::op(l->path, val), r->path);
-            heavy = M::op(M::op(l->sum(), val), r->sum());
-        }
-        void push() {
-            if (exchange(rev, 0)) l->reverse(), r->reverse();
-        }
-        void reverse() { swap(l, r), path = M::flip(path), rev ^= 1; }
-    };
-    static inline ptr nil = &node::nil;
-    bool dir(ptr t) { return t == t->p->r; }
-    bool is_root(ptr t) {
-        return t->p == nil || (t != t->p->l && t != t->p->r);
+    auto operator[](int i) { return &nodes[i]; }
+
+    void splay(int v) { splay(&nodes[v]); }
+    void expose(int v) { expose(&nodes[v]); }
+    void evert(int v) { evert(&nodes[v]); }
+    void link(int u, int v) { link(&nodes[u], &nodes[v]); }
+    void cut(int u, int v) { cut(&nodes[u], &nodes[v]); }
+    int lca(int u, int v) {
+        ptr l = lca(&nodes[u], &nodes[v]);
+        return l ? l->id : -1;
     }
-    void attach(ptr p, bool d, ptr c) {
-        if (c) c->p = p;
-        p->ch[d] = c, p->pull();
-    }
-    void rot(ptr t) {
-        bool d = dir(t);
-        ptr p = t->p;
-        t->p = p->p;
-        if (!is_root(p)) attach(p->p, dir(p), t);
-        attach(p, d, t->ch[!d]);
-        attach(t, !d, p);
-    }
+    template<class T> void set(int v, T &&x) { expose(v), nodes[v].set(x); }
+    template<class T> void add(int v, T &&x) { expose(v), nodes[v].add(x); }
+
     void splay(ptr t) {
-        for (t->push(); !is_root(t); rot(t)) {
-            ptr p = t->p;
-            if (p->p != nil) p->p->push();
+        for (t->push(); state(t); rot(t)) {
+            ptr p = t->p, g = p->p;
+            if (g) g->push();
             p->push(), t->push();
-            if (!is_root(p)) rot(dir(t) == dir(p) ? p : t);
+            if (state(p)) rot(state(t) == state(p) ? p : t);
         }
     }
     void expose(ptr t) {
-        ptr cur = t, prv = nil;
-        for (; cur != nil; cur = cur->p) {
+        ptr prv = 0, cur = t;
+        for (; cur; cur = cur->p) {
             splay(cur);
-            cur->light = M::op(cur->light, cur->r->sum());
-            cur->light = M::op(cur->light, M::inv(prv->sum()));
+            if (cur->r) cur->add_light(cur->r);
+            if (prv) cur->sub_light(prv);
             attach(cur, 1, exchange(prv, cur));
         }
         splay(t);
     }
-
-    vector<ptr> vert;
-    LCT(int n = 0) {
-        for (int i = 0; i < n; i++) vert.push_back(new node(i));
-    }
-
-    void expose(int v) { expose(vert[v]); }
-    void evert(int v) { expose(v), vert[v]->reverse(); }
-    void link(int v, int p) {
+    void evert(ptr t) { expose(t), t->reverse(); }
+    void link(ptr v, ptr p) {
         evert(v), expose(p);
-        assert(vert[v]->p == nil);
-        attach(vert[p], 1, vert[v]);
+        assert(!v->p && !p->r);
+        attach(p, 1, v);
     }
-    void cut(int v) {
-        expose(v);
-        assert(vert[v]->l != nil);
-        attach(vert[v], 0, vert[v]->l->p = nil);
+    void cut(ptr v, ptr p) {
+        evert(p), expose(v);
+        assert(!v->p && v->l == p);
+        attach(v, 0, p->p = 0);
     }
-    T get(int v) { return vert[v]->val; }
-    void set(int v, const T &x) {
-        expose(v), vert[v]->val = x, vert[v]->pull();
-    }
-    void add(int v, const T &x) {
-        expose(v), vert[v]->val = M::op(vert[v]->val, x), vert[v]->pull();
-    }
-    int lca(int u, int v) {
-        if (u == v) return u;
+    ptr lca(ptr u, ptr v) {
         expose(u), expose(v);
-        if (vert[u]->p == nil) return -1;
-        splay(vert[u]);
-        return vert[u]->p != nil ? vert[u]->p->id : u;
+        if (!u->p) return 0;
+        splay(u);
+        return u->p ?: u;
     }
-    T path_fold(int u, int v) {
-        evert(u), expose(v);
-        return vert[v]->path;
+
+  private:
+    auto &ch(ptr t, bool d) { return d ? t->r : t->l; }
+    void attach(ptr p, int d, ptr c) {
+        if (c) c->p = p;
+        ch(p, d) = c, p->pull();
     }
-    T subtree_fold(int v, int p) {
-        evert(p), cut(v);
-        T ret = vert[v]->sum();
-        link(v, p);
-        return ret;
+    int state(ptr t) {
+        if (!t->p) return 0;
+        return t == t->p->l ? -1 : t == t->p->r ? 1 : 0;
+    }
+    void rot(ptr t) {
+        ptr p = t->p, g = p->p;
+        int d = state(t) == 1, dp = state(p);
+        t->p = p->p;
+        if (g) dp ? attach(g, dp == 1, t) : g->change_light(p, t);
+        attach(p, d, ch(t, !d));
+        attach(t, !d, p);
     }
 };
-#undef l
-#undef r
