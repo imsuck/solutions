@@ -1,29 +1,17 @@
+#pragma once
+
 template<class T> struct rev_t {
-    T &cont;
-    struct iterator {
-        T cont;
-        int p;
-        bool operator!=(const iterator &r) const { return p != r.p; }
-        void operator++() { p--; }
-        typename T::value_type &operator*() { return cont[p]; }
-    };
-    iterator begin() { return {cont, (int)cont.size() - 1}; }
-    iterator end() { return {cont, -1}; }
+    T &x;
+    auto begin() const { return x.rbegin(); }
+    auto end() const { return x.rend(); }
 };
 template<class T> struct crev_t {
-    const T &cont;
-    struct iterator {
-        T cont;
-        int p;
-        bool operator!=(const iterator &r) const { return p != r.p; }
-        void operator++() { p--; }
-        const typename T::value_type &operator*() { return cont[p]; }
-    };
-    iterator begin() { return {cont, (int)cont.size() - 1}; }
-    iterator end() { return {cont, -1}; }
+    const T &x;
+    auto begin() const { return x.crbegin(); }
+    auto end() const { return x.crend(); }
 };
-template<class T> rev_t<T> rev(T &a) { return {a}; }
-template<class T> crev_t<T> rev(const T &a) { return {a}; }
+template<class T> auto rev(T &x) { return rev_t<T>{x}; }
+template<class T> auto crev(const T &x) { return crev_t<T>{x}; }
 template<class T = int> struct range {
     range() {}
     range(T _stop) : stop(_stop) {}

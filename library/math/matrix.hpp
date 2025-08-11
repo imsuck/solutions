@@ -1,8 +1,4 @@
-#include <array>
-#include <cassert>
-#include <cstdint>
-#include <vector>
-using namespace std;
+#pragma once
 
 using i32 = int32_t;
 using i64 = int64_t;

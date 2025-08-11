@@ -1,9 +1,4 @@
-#include <limits>
-#include <queue>
-#include <set>
-#include <stack>
-#include <vector>
-using namespace std;
+#pragma once
 
 // clang-format off
 template<class T, int K = 31> struct Dinitz {

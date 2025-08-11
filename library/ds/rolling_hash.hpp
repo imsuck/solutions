@@ -1,7 +1,4 @@
-#include <cassert>
-#include <cstdint>
-#include <random>
-using namespace std;
+#pragma once
 
 struct RollingHash {
     using u64 = uint64_t;

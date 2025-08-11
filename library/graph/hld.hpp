@@ -1,6 +1,4 @@
-#include <cassert>
-#include <vector>
-using namespace std;
+#pragma once
 
 struct HLD {
     int n;

@@ -1,7 +1,4 @@
-#include <functional>
-#include <utility>
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class M> struct Rerooting {
     using T = typename M::T;

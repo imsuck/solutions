@@ -1,4 +1,4 @@
-#include <cstddef>
+#pragma once
 
 char BUF[256 << 20]; // 256 MB
 size_t BUFP = sizeof(BUF);

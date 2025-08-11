@@ -1,6 +1,4 @@
-#include <algorithm>
-#include <vector>
-using namespace std;
+#pragma once
 
 // Silly std::vector wrapper I wrote for fun
 template<class T> struct Vec {

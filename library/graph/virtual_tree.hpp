@@ -1,7 +1,4 @@
-#include <stack>
-#include <string>
-#include <vector>
-using namespace std;
+#pragma once
 
 #include "hld.hpp"
 

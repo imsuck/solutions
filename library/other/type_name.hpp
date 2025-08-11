@@ -1,6 +1,4 @@
-#include <string>
-#include <string_view>
-using namespace std;
+#pragma once
 
 // Not particularly useful but nice to have around
 

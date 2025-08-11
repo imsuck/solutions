@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+# expand includes of last modified .cpp file and copies to clipboard
+LAST_MODIFIED="$(fd -Iae cpp -x stat --format '%Y %n' {} \; | sort -nr | head -1 | cut -d' ' -f2-)"
+python3 script/expand_include.py $LAST_MODIFIED | xclip -selection clipboard

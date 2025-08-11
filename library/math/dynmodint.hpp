@@ -1,8 +1,4 @@
-#include <cassert>
-#include <cstdint>
-#include <istream>
-#include <utility>
-using namespace std;
+#pragma once
 
 // clang-format off
 template<int id = 0> struct dynmodint {

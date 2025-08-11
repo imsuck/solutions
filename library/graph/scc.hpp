@@ -1,7 +1,4 @@
-#include <algorithm>
-#include <string>
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class G> auto find_scc(const G &g) {
     int n = (int)g.size();

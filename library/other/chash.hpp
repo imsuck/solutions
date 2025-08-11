@@ -1,9 +1,4 @@
-#include <cstdint>
-#include <memory>
-#include <random>
-#include <tuple>
-#include <type_traits>
-using namespace std;
+#pragma once
 
 template<class T, class D = void> struct _chash;
 template<class T> inline void hash_combine(uint64_t &seed, const T &v) {
@@ -12,12 +7,12 @@ template<class T> inline void hash_combine(uint64_t &seed, const T &v) {
 template<class T> struct _chash<T, enable_if_t<is_integral_v<T>>> {
     uint64_t operator()(T x) const {
         // uncomment to use with STL
-        // static const uint64_t RAND =
-        //     mt19937_64((uint64_t)make_unique<char>().get())();
-        // x ^= RAND;
-        // (x ^= x >> 30) *= 0xbf58476d1ce4e5b9;
-        // (x ^= x >> 27) *= 0x94d049bb133111eb;
-        // x ^= x >> 31;
+        static const uint64_t RAND =
+            mt19937_64((uint64_t)make_unique<char>().get())();
+        x ^= RAND;
+        (x ^= x >> 30) *= 0xbf58476d1ce4e5b9;
+        (x ^= x >> 27) *= 0x94d049bb133111eb;
+        x ^= x >> 31;
         return x;
     }
 };

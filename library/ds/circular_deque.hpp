@@ -1,8 +1,4 @@
-#include <array>
-#include <cstddef>
-#include <utility>
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class T, size_t N> struct CircularDeque {
     using value_type = T;

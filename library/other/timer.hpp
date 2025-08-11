@@ -1,8 +1,4 @@
-#include <chrono>
-#include <iostream>
-#include <map>
-#include <string>
-using namespace std;
+#pragma once
 
 namespace timer {
     using namespace chrono;

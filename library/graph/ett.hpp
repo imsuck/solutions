@@ -1,7 +1,4 @@
-#include <memory>
-#include <random>
-#include <map>
-using namespace std;
+#pragma once
 
 #include "../other/st_alloc.hpp"
 

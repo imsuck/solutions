@@ -1,6 +1,6 @@
 #ifndef LOCAL
     #define dbg(...) void()
-    #define mark_dbg() if (false)
+    #define debug() if (false)
 #else
 namespace dbg::options {
     template<> constexpr bool trivial_string() { return false; }

@@ -1,6 +1,4 @@
-#include <cassert>
-#include <vector>
-using namespace std;
+#pragma once
 
 // Modified version of atcoder library's segtree.hpp
 template<class M> struct SegTree {

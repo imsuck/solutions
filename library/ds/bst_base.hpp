@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../other/st_alloc.hpp"
 
 namespace bst {

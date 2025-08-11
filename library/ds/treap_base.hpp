@@ -1,6 +1,4 @@
-#include <chrono>
-#include <cstdint>
-#include <random>
+#pragma once
 
 #include "./bst_base.hpp"
 

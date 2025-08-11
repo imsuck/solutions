@@ -1,6 +1,4 @@
-#include <cassert>
-#include <vector>
-using namespace std;
+#pragma once
 
 // clang-format off
 struct XorTree {

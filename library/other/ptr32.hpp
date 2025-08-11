@@ -1,6 +1,4 @@
-#include <deque>
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class T, bool auto_resize = true> struct ptr32 {
     ptr32() {}

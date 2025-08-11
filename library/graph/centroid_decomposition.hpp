@@ -1,5 +1,4 @@
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class G>
 tuple<vector<int>, vector<int>, vector<int>> centroid_decomp(const G &g) {

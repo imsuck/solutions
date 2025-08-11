@@ -1,8 +1,4 @@
-#include <algorithm>
-#include <cmath>
-#include <numeric>
-#include <vector>
-using namespace std;
+#pragma once
 
 struct Mo {
     int q;

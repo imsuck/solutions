@@ -1,5 +1,4 @@
-#include <bits/stdc++.h>
-using namespace std;
+#pragma once
 
 struct DSU {
     using i32 = int32_t;

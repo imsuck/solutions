@@ -1,5 +1,4 @@
-#include <vector>
-using namespace std;
+#pragma once
 
 //! Adjacency edge list
 //  Doesn't support g[v][i] D:

@@ -1,5 +1,4 @@
-#include <vector>
-using namespace std;
+#pragma once
 
 #include "../other/mo.hpp"
 

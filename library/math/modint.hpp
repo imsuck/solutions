@@ -1,8 +1,4 @@
-#include <cassert>
-#include <cstdint>
-#include <istream>
-#include <utility>
-using namespace std;
+#pragma once
 
 // clang-format off
 template<uint32_t m> struct modint {

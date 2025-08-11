@@ -1,6 +1,4 @@
-#include <chrono>
-#include <cstdint>
-#include <iterator>
+#pragma once
 
 // clang-format off
 namespace hashing {

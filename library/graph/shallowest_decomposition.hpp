@@ -1,6 +1,4 @@
-#include <cstdint>
-#include <vector>
-using namespace std;
+#pragma once
 
 // clang-format off
 template<class G> pair<G, int> shallowest_decomp(const G &g) {

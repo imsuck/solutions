@@ -1,6 +1,4 @@
-#include <random>
-#include <utility>
-using namespace std;
+#pragma once
 
 #include "../other/st_alloc.hpp"
 

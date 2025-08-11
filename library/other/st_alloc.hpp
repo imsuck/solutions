@@ -1,5 +1,4 @@
-#include <stack>
-using namespace std;
+#pragma once
 
 template<class T> struct st_alloc {
     static inline stack<T> pool;

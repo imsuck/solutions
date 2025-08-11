@@ -1,6 +1,4 @@
-#include <numeric>
-#include <vector>
-using namespace std;
+#pragma once
 
 // https://usaco.guide/plat/DC-SRQ
 // Not really optimized I just wrote this on a whim

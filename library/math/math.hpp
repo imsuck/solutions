@@ -1,4 +1,4 @@
-#include <cstdint>
+#pragma once
 
 // clang-format off
 namespace utils {

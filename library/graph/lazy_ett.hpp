@@ -1,8 +1,4 @@
-#include <cstdint>
-#include <map>
-#include <memory>
-#include <random>
-using namespace std;
+#pragma once
 
 #include "../other/st_alloc.hpp"
 

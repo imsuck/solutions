@@ -1,5 +1,4 @@
-#include <optional>
-using namespace std;
+#pragma once
 
 #include "../data_structure/treap_base.hpp"
 

@@ -1,6 +1,4 @@
-#include <array>
-#include <vector>
-using namespace std;
+#pragma once
 
 // clang-format off
 template<class T, int N> struct mdvec {

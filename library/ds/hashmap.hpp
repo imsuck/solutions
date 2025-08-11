@@ -1,8 +1,4 @@
-#include <cstdint>
-#include <memory>
-#include <random>
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class K, class V, class Hash> struct hash_map_base {
     using u32 = uint32_t;

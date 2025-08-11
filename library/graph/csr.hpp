@@ -1,5 +1,4 @@
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class E> struct CSR {
     CSR() {}

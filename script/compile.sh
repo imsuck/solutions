@@ -4,6 +4,7 @@
 # helix uncomment macro "ghlmd`dd"
 
 DIR="$(dirname "$0")"
+LAST_MODIFIED="$(fd -Iae cpp -x stat --format '%Y %n' {} \; | sort -nr | head -1 | cut -d' ' -f2-)"
 
 echo
 echo "---------- Compilation ---------"
@@ -12,7 +13,7 @@ g++ -include bits/stdc++.h -include lib/debug/debug.hpp -std=c++17 -DLOCAL \
 -Wall -Wextra -Wshadow -Wfloat-equal -Wno-sign-compare \
 -D_GLIBCXX_NO_ASSERTIONS `# -O2` \
 -fsanitize=undefined,address -g \
--o a.out $(fd -Iae cpp --changed-within 3s)
+-o a.out $LAST_MODIFIED
 ok=$?
 end=`date +%s.%N`
 echo "Compilation took: $(echo "$end - $start" | bc -l)s"

@@ -1,6 +1,4 @@
-#include <cassert>
-#include <vector>
-using namespace std;
+#pragma once
 
 // M: T M::id(), F M::fid(), T op(T, T), F comp(F, F), bool map(F, &T)
 template<class M> struct LazySegTree {

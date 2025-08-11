@@ -1,9 +1,4 @@
-#include <cassert>
-#include <cstdint>
-#include <limits>
-#include <utility>
-#include <vector>
-using namespace std;
+#pragma once
 
 // clang-format off
 template<class Int> struct sbt_node {

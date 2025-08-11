@@ -1,4 +1,5 @@
-// clang-format off
+#pragma once
+
 template<class T, class Cb> struct UpdateProxy {
     T &x;
     Cb cb;

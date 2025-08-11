@@ -1,4 +1,4 @@
-#include <cassert>
+#pragma once
 
 #include "../other/st_alloc.hpp"
 

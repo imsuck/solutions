@@ -1,6 +1,4 @@
-#include <cassert>
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class M> struct DisjointSparseTable {
     using T = typename M::T;

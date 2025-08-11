@@ -1,5 +1,4 @@
-#include <type_traits>
-using namespace std;
+#pragma once
 
 template<class F> struct y_comb_t {
     F f;

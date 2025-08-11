@@ -1,6 +1,4 @@
-#include <cstdint>
-#include <random>
-using namespace std;
+#pragma once
 
 struct pcg64 {
     using result_type = uint64_t;

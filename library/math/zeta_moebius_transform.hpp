@@ -1,5 +1,4 @@
-#include <vector>
-using namespace std;
+#pragma once
 
 template<class T> void multiple_fzt(vector<T> &a) {
     const int n = (int)a.size();
