@@ -9,7 +9,8 @@
 namespace dbg {
     namespace _detail {
         template<typename T> string dbg_info(T &&x) {
-            if constexpr (is_same_v<remove_cvref_t<T>, bool>) {
+            if constexpr (is_same_v<remove_cvref_t<T>, bool> ||
+                          is_vec_bool_ref<T>::value) {
                 return dbg_bool(x);
             } else if constexpr (is_same_v<remove_cvref_t<T>, char>) {
                 return dbg_char(x);
@@ -23,7 +24,7 @@ namespace dbg {
                 return dbg_tuple(x);
             } else if constexpr (is_vector_v<T> || _detail::is_array_v<T>) {
                 return dbg_iterable(x, "[", "]");
-            } else if constexpr(is_map<T>) {
+            } else if constexpr (is_map<T>) {
                 return dbg_map(x);
             } else if constexpr (is_stack_v<T>) {
                 return dbg_stack(x);

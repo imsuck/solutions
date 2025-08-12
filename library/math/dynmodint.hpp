@@ -3,8 +3,8 @@
 // clang-format off
 template<int id = 0> struct dynmodint {
     using mint = dynmodint;
+    static constexpr bool is_simple = true;
 
-  public:
     static void set_mod(uint32_t m) {
         assert(m >= 1 && "Modulus must be in the range [1;2^31)");
         mint::m = m;

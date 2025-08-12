@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../other/update_proxy.hpp"
+
 // Modified version of atcoder library's segtree.hpp
 template<class M> struct SegTree {
     using T = typename M::T;
@@ -15,7 +17,12 @@ template<class M> struct SegTree {
     }
     void set(int p, T val) {
         assert(0 <= p && p < n);
-        for (t[p += m] = val; p >>= 1;) update(p);
+        t[p + m] = val, update_from(p);
+    }
+    auto operator[](int p) {
+        assert(0 <= p && p < n);
+        UpdateProxy up(t[p + m], [this, p]() { update_from(p); });
+        return up;
     }
     T operator[](int p) const {
         assert(0 <= p && p < n);
@@ -79,4 +86,7 @@ template<class M> struct SegTree {
     static int bit_ceil(int n) { int m = 1; while (m < n) m *= 2; return m; }
     // clang-format on
     void update(int p) { t[p] = M::op(t[p << 1], t[p << 1 | 1]); }
+    void update_from(int p) {
+        for (p += m; p >>= 1;) update(p);
+    }
 };

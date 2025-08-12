@@ -72,6 +72,10 @@ namespace dbg {
             static auto test(int) -> enable_if_t<
                 is_same_v<decay_t<TT>, vector<bool>::const_reference>,
                 true_type>;
+            template<typename TT>
+            static auto test(long) -> enable_if_t<
+                is_same_v<decay_t<TT>, vector<bool>::reference>,
+                true_type>;
             template<typename> static auto test(...) -> false_type;
 
             static constexpr bool value = decltype(test<T>(0))::value;
@@ -96,13 +100,12 @@ namespace dbg {
             is_convertible_v<T, string_view> && !is_nullptr<T>;
 
         // Streamable ----------------------------------------------------------
-        template<typename T> struct streamable {
-            template<typename TT>
-            static auto test(int)
-                -> decltype(declval<ostream>() << declval<TT>(), true_type());
-            template<typename TT> static auto test(...) -> false_type;
-
-            static constexpr bool value = decltype(test<T>(0))::value;
+        template<typename T, typename D = void>
+        struct streamable : false_type {};
+        template<typename T>
+        struct streamable<
+            T,
+            void_t<decltype(declval<ostream>() << declval<T>())>> : true_type {
         };
         template<typename T>
         inline constexpr bool streamable_v =
@@ -164,24 +167,30 @@ namespace dbg {
         inline constexpr bool is_queue_v = is_queue<remove_cvref_t<T>>::value;
 
         // Iterable ------------------------------------------------------------
-        template<typename T> struct iterable {
-            template<typename TT>
-            static auto test(int)
-                -> decltype(iter_begin(declval<TT>()), true_type());
-            template<typename TT> static auto test(...) -> false_type;
-
-            static constexpr bool value = decltype(test<T>(0))::value;
-        };
+        template<typename T, typename D = void> struct iterable : false_type {};
+        template<typename T>
+        struct iterable<T, void_t<decltype(iter_begin(declval<T>()))>>
+            : true_type {};
         template<typename T>
         inline constexpr bool iterable_v = iterable<remove_cvref_t<T>>::value;
 
         // Multiline utility stuff
+        // user defined T::is_simple
+        template<typename _T, typename D = void>
+        struct is_simple : false_type {};
+        template<typename T>
+        struct is_simple<
+            T,
+            void_t<decltype(_detail::remove_cvref_t<T>::is_simple)>>
+            : true_type {};
+        // heuristics
         template<typename _T, typename T = _detail::remove_cvref_t<_T>>
         struct is_trivial {
             static constexpr bool value =
                 (std::is_trivial_v<T> && is_standard_layout_v<T> &&
                  !is_array_v<T>) ||
-                (is_string<T> && dbg::options::trivial_string());
+                (is_string<T> && dbg::options::trivial_string()) ||
+                is_vec_bool_ref<T>::value || is_simple<T>::value;
         };
         template<typename T, typename U> struct is_trivial<pair<T, U>> {
             static constexpr bool value =

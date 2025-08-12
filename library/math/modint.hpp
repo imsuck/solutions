@@ -5,8 +5,8 @@ template<uint32_t m> struct modint {
     static_assert(m >= 1, "Modulus must be in the range [1;2^31)");
 
     using mint = modint;
+    static constexpr bool is_simple = true;
 
-  public:
     static constexpr uint32_t mod() noexcept { return m; }
     constexpr modint() noexcept = default;
     constexpr modint(int64_t v) noexcept : _v(uint32_t((v %= m) < 0 ? v + m : v)) {}

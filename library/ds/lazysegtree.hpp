@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../other/update_proxy.hpp"
+
 // M: T M::id(), F M::fid(), T op(T, T), F comp(F, F), bool map(F, &T)
 template<class M> struct LazySegTree {
     using T = typename M::T;
@@ -23,9 +25,10 @@ template<class M> struct LazySegTree {
         assert(0 <= p && p < n);
         push_to(p), t[p + m] = x, update_from(p);
     }
-    T operator[](int p) {
+    auto operator[](int p) {
         assert(0 <= p && p < n);
-        return push_to(p), t[p + m];
+        UpdateProxy up(t[p + m], [this, p]() { update_from(p); });
+        return push_to(p), up;
     }
     T get(int p) { return (*this)[p]; }
 

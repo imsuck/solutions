@@ -78,3 +78,22 @@ template<class node> struct LCT {
         attach(t, !d, p);
     }
 };
+
+template<class node> struct lct_node {
+    using ptr = node *;
+    static ptr $(ptr t) {
+        static node nil;
+        return t ?: &nil;
+    }
+    ptr p = 0, l = 0, r = 0;
+    int id = -1;
+    bool rev = 0;
+    lct_node(int i = -1) : id(i) {}
+
+    node *as_derived() { return (node *)this; };
+    void push() {
+        if (exchange(rev, 0)) $(l)->reverse(), $(r)->reverse();
+        as_derived()->_push();
+    }
+    void reverse() { swap(l, r), rev ^= 1, as_derived()->_reverse(); }
+};

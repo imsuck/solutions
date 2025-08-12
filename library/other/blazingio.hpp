@@ -1,5 +1,6 @@
 #pragma once
 
+#ifndef LOCAL
 // NOLINTBEGIN
 // clang-format off
 // DO NOT REMOVE THIS MESSAGE. The mess that follows is a minified build of
@@ -70,3 +71,4 @@ V{char*D;B*S;int J;V(){$w(E$(D=(char*)VirtualAlloc(0,536870912,8192,4))E$(Virtua
 // End of blazingio
 // NOLINTEND
 // clang-format on
+#endif

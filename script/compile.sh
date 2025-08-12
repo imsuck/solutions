@@ -12,7 +12,7 @@ start=`date +%s.%N`
 g++ -include bits/stdc++.h -include lib/debug/debug.hpp -std=c++17 -DLOCAL \
 -Wall -Wextra -Wshadow -Wfloat-equal -Wno-sign-compare \
 -D_GLIBCXX_NO_ASSERTIONS `# -O2` \
--fsanitize=undefined,address -g \
+-fsanitize=undefined,address -fsplit-stack -g \
 -o a.out $LAST_MODIFIED
 ok=$?
 end=`date +%s.%N`
