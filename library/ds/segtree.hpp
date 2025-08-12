@@ -15,9 +15,13 @@ template<class M> struct SegTree {
         copy(begin(v), end(v), begin(t) + m);
         for (int i = m; --i;) update(i);
     }
-    void set(int p, T val) {
+    void set(int p, const T &x) {
         assert(0 <= p && p < n);
         t[p + m] = val, update_from(p);
+    }
+    void mul(int p, const T &x) {
+        assert(0 <= p && p < n);
+        t[p + m] = M::op(t[p + m], x), update_from(p);
     }
     auto operator[](int p) {
         assert(0 <= p && p < n);

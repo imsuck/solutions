@@ -25,6 +25,10 @@ template<class M> struct LazySegTree {
         assert(0 <= p && p < n);
         push_to(p), t[p + m] = x, update_from(p);
     }
+    void mul(int p, const T &x) {
+        assert(0 <= p && p < n);
+        push_to(p), t[p + m] = M::op(t[p + m], x), update_from(p);
+    }
     auto operator[](int p) {
         assert(0 <= p && p < n);
         UpdateProxy up(t[p + m], [this, p]() { update_from(p); });

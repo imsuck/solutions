@@ -20,7 +20,7 @@ struct XorTree {
                 apply_vertex(v), apply_edge(p, v);
             }
         }
-        apply_vertex(root);
+        apply_vertex(root), par[root] = -1;
     }
     auto dfs_ord() {
         int id = n;
