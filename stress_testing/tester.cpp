@@ -19,14 +19,17 @@ void gen_test() {
     for (auto [u, v] : tree) println(u, v);
 }
 
+bool check_output() { return system("diff a.output a.ans"); }
+
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        cerr << "Missing args\n";
+    if (argc < 4) {
+        cerr << "Missing args: seed, cnt, time_lim\n";
         return 1;
     }
 
     const int seed = atoi(argv[1]);
     const int cnt = atoi(argv[2]);
+    const int time_lim = atoi(argv[3]);
     gen = Gen(seed);
 
     for (int i = 1; cnt == -1 || i <= cnt; i++) {
@@ -38,12 +41,23 @@ int main(int argc, char *argv[]) {
         );
         ng |= system("./safe.out <a.inp >a.ans");
 
+        string why = "";
+
         this_thread::sleep_for(20ms); // wait for files to finish writing
-        if (ng || system("diff a.output a.ans") != 0) {
-            cout << "Test " << i << ": NG " << (ng ? "(RTE)" : "(WA)") << endl;
+        if (ng) {
+            why = "RTE";
+        } else if (check_output()) {
+            why = "WA";
+        } else if (time_lim != -1 && dur.count() > time_lim) {
+            why = "TLE";
+        }
+        if (!why.empty()) {
+            cout << "Test " << i << ": " << why << " " << dur.count() << " ms"
+                 << endl;
             return 1;
         }
-        cout << "Test " << i << ": OK, Time: " << dur.count() << "ms" << endl;
+
+        cout << "Test " << i << ": OK, Time: " << dur.count() << " ms" << endl;
     }
     cout << "Maybe it is correct\n";
 }
