@@ -4,4 +4,4 @@ Precompiling `<bits/stdc++.h>`: [bits/](https://github.com/imsuck/solutions/tree
 
 Debugging and int128: [lib/](https://github.com/imsuck/solutions/tree/main/lib)
 
-A few templates for data structures: [templates/](https://github.com/imsuck/solutions/tree/main/templates)
+Code library: [library/](https://github.com/imsuck/solutions/tree/main/library)
