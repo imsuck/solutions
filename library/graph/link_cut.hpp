@@ -23,7 +23,7 @@ template<class node> struct LCT {
     template<class T> void set(int v, T &&x) { expose(v), nodes[v].set(x); }
     template<class T> void add(int v, T &&x) { expose(v), nodes[v].add(x); }
 
-    void splay(ptr t) {
+    static void splay(ptr t) {
         for (t->push(); state(t); rot(t)) {
             ptr p = t->p, g = p->p;
             if (g) g->push();
@@ -31,7 +31,7 @@ template<class node> struct LCT {
             if (state(p)) rot(state(t) == state(p) ? p : t);
         }
     }
-    void expose(ptr t) {
+    static void expose(ptr t) {
         ptr prv = 0, cur = t;
         for (; cur; cur = cur->p) {
             splay(cur);
@@ -41,18 +41,18 @@ template<class node> struct LCT {
         }
         splay(t);
     }
-    void evert(ptr t) { expose(t), t->reverse(); }
-    void link(ptr v, ptr p) {
+    static void evert(ptr t) { expose(t), t->reverse(); }
+    static void link(ptr v, ptr p) {
         evert(v), expose(p);
         assert(!v->p && !p->r);
         attach(p, 1, v);
     }
-    void cut(ptr v, ptr p) {
+    static void cut(ptr v, ptr p) {
         evert(p), expose(v);
         assert(!v->p && v->l == p);
         attach(v, 0, p->p = 0);
     }
-    ptr lca(ptr u, ptr v) {
+    static ptr lca(ptr u, ptr v) {
         expose(u), expose(v);
         if (!u->p) return 0;
         splay(u);
@@ -60,16 +60,16 @@ template<class node> struct LCT {
     }
 
   private:
-    auto &ch(ptr t, bool d) { return d ? t->r : t->l; }
-    void attach(ptr p, int d, ptr c) {
+    static ptr &ch(ptr t, bool d) { return d ? t->r : t->l; }
+    static void attach(ptr p, int d, ptr c) {
         if (c) c->p = p;
         ch(p, d) = c, p->pull();
     }
-    int state(ptr t) {
+    static int state(ptr t) {
         if (!t->p) return 0;
         return t == t->p->l ? -1 : t == t->p->r ? 1 : 0;
     }
-    void rot(ptr t) {
+    static void rot(ptr t) {
         ptr p = t->p, g = p->p;
         int d = state(t) == 1, dp = state(p);
         t->p = p->p;

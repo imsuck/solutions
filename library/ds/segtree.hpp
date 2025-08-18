@@ -17,7 +17,7 @@ template<class M> struct SegTree {
     }
     void set(int p, const T &x) {
         assert(0 <= p && p < n);
-        t[p + m] = val, update_from(p);
+        t[p + m] = x, update_from(p);
     }
     void mul(int p, const T &x) {
         assert(0 <= p && p < n);

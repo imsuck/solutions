@@ -2,10 +2,11 @@
 
 struct HLD {
     int n;
-    vector<int> par, in, out, hs;
+    vector<int> in, par, dep, out, hs;
 
     template<class G>
-    HLD(G &g, int root = 0) : n((int)g.size()), par(n), in(n), out(n), hs(n) {
+    HLD(G &g, int root = 0) :
+        n((int)g.size()), in(n), par(n), dep(n), out(n), hs(n) {
         hs[root] = root;
         dfs_sz(g, root);
         dfs_hld(g, root);
@@ -18,6 +19,11 @@ struct HLD {
             if (in[u] > in[v]) swap(u, v);
             if (hs[u] == hs[v]) return u;
         }
+    }
+    int dist(int u, int v) const {
+        assert(0 <= u && u < n);
+        assert(0 <= v && v < n);
+        return dep[u] + dep[v] - 2 * dep[lca(u, v)];
     }
     auto path(int v, int p, bool es = 0) const {
         assert(in[p] <= in[v] && out[v] <= out[p]);
@@ -39,6 +45,7 @@ struct HLD {
         int sz = 1, mx = 0;
         for (int &c : g[v]) {
             if (c == p) continue;
+            dep[c] = dep[v] + 1;
             int s = dfs_sz(g, c, v);
             sz += s;
             if (g[v][0] == p || mx < s) mx = s, swap(g[v][0], c);

@@ -19,6 +19,7 @@ void gen_test() {
     for (auto [u, v] : tree) println(u, v);
 }
 
+// false = AC, true = WA
 bool check_output() { return system("diff a.output a.ans"); }
 
 int main(int argc, char *argv[]) {

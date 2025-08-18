@@ -3,7 +3,7 @@
 struct RollingHash {
     using u64 = uint64_t;
     static u64 gen_base() noexcept {
-        mt19937_64 rng(random_device{}());
+        mt19937_64 rng((u64)make_unique<char>().get());
         uniform_int_distribution<u64> dist(1024, mod - 1);
         return dist(rng);
     }
