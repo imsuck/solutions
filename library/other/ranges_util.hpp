@@ -11,7 +11,7 @@ template<class T> struct crev_t {
     auto end() const { return x.crend(); }
 };
 template<class T> auto rev(T &x) { return rev_t<T>{x}; }
-template<class T> auto crev(const T &x) { return crev_t<T>{x}; }
+template<class T> auto rev(const T &x) { return crev_t<T>{x}; }
 template<class T = int> struct range {
     range() {}
     range(T _stop) : stop(_stop) {}

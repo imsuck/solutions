@@ -39,9 +39,9 @@ template<uint32_t m> struct modint {
     constexpr mint operator+() const noexcept { return *this; }
     constexpr mint operator-() const noexcept { return raw(_v ? mod() - _v : 0); }
 
-    constexpr friend bool operator==(const mint &l, const mint &r) noexcept { return l._v == r._v; }
-    constexpr friend bool operator!=(const mint &l, const mint &r) noexcept { return l._v != r._v; }
-    constexpr friend bool operator<(const mint &l, const mint &r) noexcept { return l._v < r._v; }
+    constexpr friend bool operator==(mint l, mint r) noexcept { return l._v == r._v; }
+    constexpr friend bool operator!=(mint l, mint r) noexcept { return l._v != r._v; }
+    constexpr friend bool operator<(mint l, mint r) noexcept { return l._v < r._v; }
 
     constexpr mint pow(uint64_t n) const noexcept {
         mint b = *this, res = 1;

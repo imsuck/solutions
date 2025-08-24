@@ -20,7 +20,14 @@ void gen_test() {
 }
 
 // false = AC, true = WA
-bool check_output() { return system("diff a.output a.ans"); }
+bool check_output() {
+    return system("diff a.output a.ans");
+    // ifstream cin("a.output");
+    // string s;
+    // cin >> s;
+    // if (s == "IMPOSSIBLE") return 1;
+    // return 0;
+}
 
 int main(int argc, char *argv[]) {
     if (argc < 4) {

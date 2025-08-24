@@ -11,10 +11,14 @@ template<class M> struct SegTree {
 
     SegTree() = default;
     SegTree(int _n) : n(_n), m(bit_ceil(n)), t(2 * m, M::id()) {}
-    template<class V> SegTree(const V &v) : SegTree((int)v.size()) {
-        copy(begin(v), end(v), begin(t) + m);
+    template<class G> SegTree(int _n, G &&gen) : SegTree(_n) {
+        for (int i = 0; i < n; i++) t[i + m] = gen(i);
         for (int i = m; --i;) update(i);
     }
+    template<class V>
+    SegTree(const V &v) :
+        SegTree((int)v.size(), [&](int i) { return T(v[i]); }) {}
+
     void set(int p, const T &x) {
         assert(0 <= p && p < n);
         t[p + m] = x, update_from(p);
