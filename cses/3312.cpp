@@ -1,6 +1,5 @@
 #include <bits/stdc++.h>
 using namespace std;
-#include "library/graph/scc.hpp"
 #include "library/other/dbg.hpp"
 #include "library/other/two_sat.hpp"
 #include "library/other/types.hpp"
@@ -25,17 +24,17 @@ fn solve() {
             if (i) {
                 oid = id - m;
                 auto x = mp[b[i][j]], y = mp[b[i - 1][j]];
-                if (x[0] == y[0]) sat.add_nand(sat.neg(id), sat.neg(oid));
-                if (x[0] == y[1]) sat.add_nand(sat.neg(id), oid);
-                if (x[1] == y[0]) sat.add_nand(id, sat.neg(oid));
+                if (x[0] == y[0]) sat.add_nand(~id, ~oid);
+                if (x[0] == y[1]) sat.add_nand(~id, oid);
+                if (x[1] == y[0]) sat.add_nand(id, ~oid);
                 if (x[1] == y[1]) sat.add_nand(id, oid);
             }
             if (j) {
                 oid = id - 1;
                 auto x = mp[b[i][j]], y = mp[b[i][j - 1]];
-                if (x[0] == y[0]) sat.add_nand(sat.neg(id), sat.neg(oid));
-                if (x[0] == y[1]) sat.add_nand(sat.neg(id), oid);
-                if (x[1] == y[0]) sat.add_nand(id, sat.neg(oid));
+                if (x[0] == y[0]) sat.add_nand(~id, ~oid);
+                if (x[0] == y[1]) sat.add_nand(~id, oid);
+                if (x[1] == y[0]) sat.add_nand(id, ~oid);
                 if (x[1] == y[1]) sat.add_nand(id, oid);
             }
         }

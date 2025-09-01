@@ -4,7 +4,7 @@ using namespace std;
 using f96 = long double;
 using f128 = __float128;
 
-f128 abs(f128 x) { return x < 0 ? -x : x; }
+f128 abs128(f128 x) { return x < 0 ? -x : x; }
 
 int main() {
     cin.tie(nullptr)->sync_with_stdio(false);
@@ -25,7 +25,7 @@ int main() {
     long i = long(f96(res));
     f128 d = res - i;
     constexpr f128 half = 1 / f128(2);
-    if (abs(d - half) < 1e-20) {
+    if (abs128(d - half) < 1e-20) {
         if (i % 2 == 0) res = i;
         else res = i + 1;
     } else {
