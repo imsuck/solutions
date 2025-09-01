@@ -5,8 +5,10 @@ template<class T = int> struct Compressor {
     vector<reference_wrapper<T>> val;
     vector<T> og;
 
+    Compressor(int n = 0) { val.reserve(n); }
+
     template<class... Ts> void push(Ts &...x) { (_push(x), ...); }
-    void build() {
+    int build() {
         sort(begin(val), end(val));
         og.reserve(val.size());
         T id = -1;
@@ -15,6 +17,7 @@ template<class T = int> struct Compressor {
             x.get() = id;
         }
         og.shrink_to_fit();
+        return size();
     }
     int size() const { return (int)og.size(); }
     T operator[](int i) const { return og[i]; }

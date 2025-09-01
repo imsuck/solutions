@@ -29,7 +29,7 @@ template<class G> pair<G, int> shallowest_decomp(const G &g) {
         forbid[v] = once | ((1 << bw(twice)) - 1);
         int label = ctz(forbid[v] + 1);
         st[label].push_back(v);
-        for (int i = g[v].size() - 1; i >= 0; i--) {
+        for (int i = (int)g[v].size() - 1; i >= 0; i--) {
             int c = g[v][i];
             chain((forbid[c] + 1) & ((1 << label) - 1), v);
         }

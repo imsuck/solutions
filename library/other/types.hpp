@@ -11,3 +11,4 @@ using f64 = double;
 using f80 = long double;
 using str = string;
 template<class T> using vec = vector<T>;
+template<class E = i32> using graph = vec<vec<E>>;

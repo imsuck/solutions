@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../data_structure/treap_base.hpp"
+#include "../ds/treap_base.hpp"
 
 // NOTE: The copy constructor only copies the pointer. Be careful when doing
 // `ordered_set<> s2 = s1;`
