@@ -24,6 +24,11 @@ template<class M> struct LazySegTree {
     LazySegTree(const V &v) :
         LazySegTree((int)v.size(), [&](int i) { return T(v[i]); }) {}
 
+    vector<T> to_vec() {
+        vector<T> r(n);
+        for (int i = 0; i < n; i++) r[i] = (*this)[i];
+        return r;
+    }
     void set(int p, const T &x) {
         assert(0 <= p && p < n);
         push_to(p), t[p + m] = x, update_from(p);

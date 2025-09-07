@@ -19,6 +19,11 @@ template<class M> struct SegTree {
     SegTree(const V &v) :
         SegTree((int)v.size(), [&](int i) { return T(v[i]); }) {}
 
+    vector<T> to_vec() {
+        vector<T> r(n);
+        for (int i = 0; i < n; i++) r[i] = t[i + m];
+        return r;
+    }
     void set(int p, const T &x) {
         assert(0 <= p && p < n);
         t[p + m] = x, update_from(p);
