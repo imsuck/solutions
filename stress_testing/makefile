@@ -8,9 +8,9 @@ dbg = 1
 
 SANITIZER = -fsanitize=undefined,address
 ifeq ($(dbg), 1)
-CFLAGS = -include ../lib/debug/debug.hpp -g -std=c++17 -DLOCAL -D_GLIBCXX_NO_ASSERTIONS
+CFLAGS = -include ../lib/debug/debug.hpp -I/home/imsuck/Yes/cp-library -g -std=c++17 -DLOCAL -D_GLIBCXX_NO_ASSERTIONS
 else ifeq ($(dbg), 0)
-CFLAGS = -g -std=c++17 -D_GLIBCXX_NO_ASSERTIONS
+CFLAGS = -I/home/imsuck/Yes/cp-library -g -std=c++17 -D_GLIBCXX_NO_ASSERTIONS
 endif
 
 r run: a.out safe.out tester

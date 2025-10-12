@@ -34,7 +34,7 @@ for file in "${files[@]}"; do
     # draw the progress bar
     draw_bar
 
-    if g++ -std=c++17 -fsyntax-only "$file" >/dev/null 2>&1; then
+    if g++ -I library -std=c++17 -fsyntax-only $@ "$file" >/dev/null 2>&1; then
         # clear line, print result
         printf "\r\033[K"
         echo "✅ $file"
