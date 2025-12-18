@@ -12,24 +12,90 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 namespace dbg {
     namespace detail {
         // Forward declarations
-        template<typename T>
-        std::string format_value(const T &value, int indent = 0);
+        template<typename T> std::string format_value(const T &value);
         template<typename... Args> std::string format_args(const Args &...args);
-
-        std::string indent_str(int level) {
-            return std::string(level * 2, ' ');
-        }
 
         inline std::string with_color(const std::string &value, Color color) {
             if (!options::enable_colors) {
                 return value;
             }
             return to_string(color) + value + to_string(Color::Reset);
+        }
+
+        inline std::string indent_str(int level) {
+            std::string indent;
+            for (int i = 0; i < level; ++i) {
+                indent += with_color("▏", Color::Black) + " ";
+            }
+            return indent;
+        }
+
+        // Helper to escape string with colors
+        inline std::string escape_string_with_colors(std::string_view str) {
+            if (!options::enable_colors) return std::string(str);
+            std::string result = to_string(Color::Green); // Start string color
+
+            for (char c : str) {
+                std::string escaped;
+                bool is_escaped = true;
+                switch (c) {
+                    case '\'':
+                        escaped = "\\'";
+                        break;
+                    case '\"':
+                        escaped = "\\\"";
+                        break;
+                    case '\\':
+                        escaped = "\\\\";
+                        break;
+                    case '\0':
+                        escaped = "\\0";
+                        break;
+                    case '\a':
+                        escaped = "\\a";
+                        break;
+                    case '\b':
+                        escaped = "\\b";
+                        break;
+                    case '\f':
+                        escaped = "\\f";
+                        break;
+                    case '\n':
+                        escaped = "\\n";
+                        break;
+                    case '\r':
+                        escaped = "\\r";
+                        break;
+                    case '\t':
+                        escaped = "\\t";
+                        break;
+                    case '\v':
+                        escaped = "\\v";
+                        break;
+                    default:
+                        if (static_cast<unsigned char>(c) < 32 ||
+                            static_cast<unsigned char>(c) > 126) {
+                            std::stringstream ss;
+                            ss << "\\x" << std::hex << std::setw(2)
+                               << std::setfill('0') << (int)(unsigned char)c;
+                            escaped = ss.str();
+                        } else {
+                            is_escaped = false;
+                            result += c;
+                        }
+                }
+
+                if (is_escaped) {
+                    result += to_string(Color::Yellow) + escaped +
+                              to_string(Color::Green);
+                }
+            }
+            result += to_string(Color::Reset);
+            return result;
         }
 
         // Custom formatter registry
@@ -89,22 +155,68 @@ namespace dbg {
             } else {
                 result = std::to_string(value);
             }
-            return with_color(result, Color::Yellow);
+            // Literals default color
+            return result;
         }
 
         inline std::string format_bool(bool value) {
-            return with_color(value ? "true" : "false", Color::Yellow);
+            return value ? "true" : "false";
         }
 
         inline std::string format_char(char value) {
-            std::string result;
-            if (value >= 32 && value <= 126) {
-                result = "'" + std::string(1, value) + "'";
-            } else {
-                // For non-printable characters, show as integer
-                result = std::to_string(static_cast<int>(value));
+            std::string escaped;
+            bool is_escaped = true;
+            switch (value) {
+                case '\'':
+                    escaped = "\\'";
+                    break;
+                case '\"':
+                    escaped = "\\\"";
+                    break;
+                case '\\':
+                    escaped = "\\\\";
+                    break;
+                case '\0':
+                    escaped = "\\0";
+                    break;
+                case '\a':
+                    escaped = "\\a";
+                    break;
+                case '\b':
+                    escaped = "\\b";
+                    break;
+                case '\f':
+                    escaped = "\\f";
+                    break;
+                case '\n':
+                    escaped = "\\n";
+                    break;
+                case '\r':
+                    escaped = "\\r";
+                    break;
+                case '\t':
+                    escaped = "\\t";
+                    break;
+                case '\v':
+                    escaped = "\\v";
+                    break;
+                default:
+                    if (static_cast<unsigned char>(value) < 32 ||
+                        static_cast<unsigned char>(value) > 126) {
+                        std::stringstream ss;
+                        ss << "\\x" << std::hex << std::setw(2)
+                           << std::setfill('0') << (int)(unsigned char)value;
+                        escaped = ss.str();
+                    } else {
+                        is_escaped = false;
+                    }
             }
-            return with_color(result, Color::Cyan);
+
+            if (is_escaped) {
+                return "'" + with_color(escaped, Color::Yellow) + "'";
+            } else {
+                return "'" + std::string(1, value) + "'";
+            }
         }
 
         template<typename T> std::string format_pointer(T *ptr) {
@@ -113,18 +225,19 @@ namespace dbg {
             if constexpr (std::is_same_v<std::remove_cv_t<T>, void>) {
                 std::stringstream ss;
                 ss << ptr;
-                return ss.str();
+                return with_color(ss.str(), Color::Yellow);
             } else {
                 // Try to format the pointed-to value
                 std::string formatted_value = format_value(*ptr);
-                // If it's just the unsupported type message, show address instead
+                // If it's just the unsupported type message, show address
+                // instead
                 std::string unsupported = unsupported_type<T>();
                 if (formatted_value == unsupported) {
                     std::stringstream ss;
                     ss << ptr;
-                    return "*" + ss.str();
+                    return with_color("*" + ss.str(), Color::Yellow);
                 } else {
-                    return "*" + formatted_value;
+                    return with_color("*", Color::Yellow) + formatted_value;
                 }
             }
         }
@@ -139,10 +252,10 @@ namespace dbg {
                 if (ptr.expired()) return "expired";
                 // Dereference valid weak_ptr by locking it
                 auto locked = ptr.lock();
-                return "*" + format_value(*locked);
+                return with_color("*", Color::Yellow) + format_value(*locked);
             } else {
                 if (!ptr) return "nullptr";
-                return "*" + format_value(*ptr);
+                return with_color("*", Color::Yellow) + format_value(*ptr);
             }
         }
 
@@ -154,7 +267,7 @@ namespace dbg {
                 ss << std::setprecision(options::float_precision);
             }
             ss << value;
-            return with_color(ss.str(), Color::Yellow);
+            return ss.str();
         }
 
         template<typename T>
@@ -173,7 +286,17 @@ namespace dbg {
                           std::is_same_v<T, char *>) {
                 if (!str) return with_color("nullptr", Color::Red);
             }
-            return with_color("\"" + std::string(str) + "\"", Color::Green);
+            // Use custom escaping implementation
+            if constexpr (std::is_same_v<T, const char *> ||
+                          std::is_same_v<T, char *>) {
+                return with_color("\"", Color::Green) +
+                       escape_string_with_colors(str) +
+                       with_color("\"", Color::Green);
+            } else {
+                return with_color("\"", Color::Green) +
+                       escape_string_with_colors(std::string_view(str)) +
+                       with_color("\"", Color::Green);
+            }
         }
 
         template<typename... Ts, size_t... Is>
@@ -198,7 +321,7 @@ namespace dbg {
         }
 
         template<typename Container>
-        std::string format_array(const Container &cont, int indent = 0) {
+        std::string format_array(const Container &cont) {
             if (cont.empty()) return with_color("[]", Color::White);
 
             std::string result = with_color("[", Color::White);
@@ -206,6 +329,7 @@ namespace dbg {
             size_t count = 0;
 
             for (const auto &item : cont) {
+                IndentGuard guard;
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
@@ -215,15 +339,16 @@ namespace dbg {
 
                 if (!first) result += with_color(", ", Color::White);
                 if (!is_trivial_v(item)) {
-                    result += "\n" + indent_str(indent + 1);
+                    result +=
+                        "\n" + indent_str(IndentGuard::get_current_level());
                 }
-                result += format_value(item, indent + 1);
+                result += format_value(item);
                 first = false;
                 ++count;
             }
 
             if (!is_trivial_type_v<typename Container::value_type>()) {
-                result += "\n" + indent_str(indent);
+                result += "\n" + indent_str(IndentGuard::get_current_level());
             }
             result += with_color("]", Color::White);
 
@@ -231,8 +356,7 @@ namespace dbg {
         }
 
         // Format C-style arrays
-        template<typename T>
-        std::string format_c_array(const T &arr, int indent = 0) {
+        template<typename T> std::string format_c_array(const T &arr) {
             using ElementType = std::remove_extent_t<T>;
             constexpr size_t N = std::extent_v<T>;
 
@@ -243,23 +367,26 @@ namespace dbg {
             size_t count = 0;
 
             for (size_t i = 0; i < N; ++i) {
+                IndentGuard guard;
                 if (options::max_container_elements != -1 &&
-                    count >= static_cast<size_t>(options::max_container_elements)) {
+                    count >=
+                        static_cast<size_t>(options::max_container_elements)) {
                     result += with_color(", ...", Color::White);
                     break;
                 }
 
                 if (!first) result += with_color(", ", Color::White);
                 if (!is_trivial_v(arr[i])) {
-                    result += "\n" + indent_str(indent + 1);
+                    result +=
+                        "\n" + indent_str(IndentGuard::get_current_level());
                 }
-                result += format_value(arr[i], indent + 1);
+                result += format_value(arr[i]);
                 first = false;
                 ++count;
             }
 
             if (!is_trivial_type_v<ElementType>()) {
-                result += "\n" + indent_str(indent);
+                result += "\n" + indent_str(IndentGuard::get_current_level());
             }
             result += with_color("]", Color::White);
 
@@ -267,8 +394,7 @@ namespace dbg {
         }
 
         template<typename Container>
-        std::string
-        format_brace_container(const Container &cont, int indent = 0) {
+        std::string format_brace_container(const Container &cont) {
             if (cont.empty()) return with_color("{}", Color::White);
 
             std::string result = with_color("{", Color::White);
@@ -276,6 +402,7 @@ namespace dbg {
             size_t count = 0;
 
             for (const auto &item : cont) {
+                IndentGuard guard;
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
@@ -285,15 +412,16 @@ namespace dbg {
 
                 if (!first) result += with_color(", ", Color::White);
                 if (!is_trivial_v(item)) {
-                    result += "\n" + indent_str(indent + 1);
+                    result +=
+                        "\n" + indent_str(IndentGuard::get_current_level());
                 }
-                result += format_value(item, indent + 1);
+                result += format_value(item);
                 first = false;
                 ++count;
             }
 
             if (!is_trivial_type_v<typename Container::value_type>()) {
-                result += "\n" + indent_str(indent);
+                result += "\n" + indent_str(IndentGuard::get_current_level());
             }
             result += with_color("}", Color::White);
 
@@ -302,13 +430,13 @@ namespace dbg {
 
         // Format deque (front to back)
         template<typename Container>
-        std::string format_deque(const Container &cont, int indent = 0) {
-            return format_brace_container(cont, indent);
+        std::string format_deque(const Container &cont) {
+            return format_brace_container(cont);
         }
 
         // Format queue (front to back)
         template<typename T, typename A>
-        std::string format_queue(const std::queue<T, A> &cont, int indent = 0) {
+        std::string format_queue(const std::queue<T, A> &cont) {
             if (cont.empty()) return "{}";
 
             std::string result = "{";
@@ -317,7 +445,7 @@ namespace dbg {
             bool first = true;
             while (!temp.empty()) {
                 if (!first) result += ", ";
-                result += format_value(temp.front(), indent);
+                result += format_value(temp.front());
                 temp.pop();
                 first = false;
             }
@@ -328,7 +456,7 @@ namespace dbg {
 
         // Format stack/priority_queue (top to bottom)
         template<typename T, typename A>
-        std::string format_stack(const std::stack<T, A> &cont, int indent = 0) {
+        std::string format_stack(const std::stack<T, A> &cont) {
             if (cont.empty()) return "{}";
 
             std::string result = "{";
@@ -337,7 +465,7 @@ namespace dbg {
             bool first = true;
             while (!temp.empty()) {
                 if (!first) result += ", ";
-                result += format_value(temp.top(), indent);
+                result += format_value(temp.top());
                 temp.pop();
                 first = false;
             }
@@ -348,10 +476,8 @@ namespace dbg {
 
         // Format priority_queue (top to bottom)
         template<typename T, typename C, typename A>
-        std::string format_priority_queue(
-            const std::priority_queue<T, C, A> &cont,
-            int indent = 0
-        ) {
+        std::string
+        format_priority_queue(const std::priority_queue<T, C, A> &cont) {
             if (cont.empty()) return "{}";
 
             std::string result = "{";
@@ -360,7 +486,7 @@ namespace dbg {
             bool first = true;
             while (!temp.empty()) {
                 if (!first) result += ", ";
-                result += format_value(temp.top(), indent);
+                result += format_value(temp.top());
                 temp.pop();
                 first = false;
             }
@@ -370,16 +496,16 @@ namespace dbg {
         }
 
         template<typename Container>
-        std::string format_set(const Container &cont, int indent = 0) {
-            return format_brace_container(cont, indent);
+        std::string format_set(const Container &cont) {
+            return format_brace_container(cont);
         }
 
         template<typename Container>
-        std::string format_multiset(const Container &cont, int indent = 0) {
+        std::string format_multiset(const Container &cont) {
             if (cont.empty()) return "{}";
 
             if (!options::show_multiplicity) {
-                return format_brace_container(cont, indent);
+                return format_brace_container(cont);
             }
 
             std::string result = "{";
@@ -388,6 +514,7 @@ namespace dbg {
 
             auto it = cont.begin();
             while (it != cont.end()) {
+                IndentGuard guard;
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
@@ -400,10 +527,11 @@ namespace dbg {
 
                 if (!first) result += ", ";
                 if (!is_trivial_v(*it)) {
-                    result += "\n" + indent_str(indent + 1);
+                    result +=
+                        "\n" + indent_str(IndentGuard::get_current_level());
                 }
 
-                result += format_value(*it, indent + 1);
+                result += format_value(*it);
                 if (multiplicity > 1) {
                     result += with_color(
                         " (" + std::to_string(multiplicity) + ")",
@@ -417,15 +545,14 @@ namespace dbg {
             }
 
             if (!is_trivial_type_v<typename Container::value_type>()) {
-                result += "\n" + indent_str(indent);
+                result += "\n" + indent_str(IndentGuard::get_current_level());
             }
             result += "}";
 
             return result;
         }
 
-        template<typename Map>
-        std::string format_map(const Map &map, int indent = 0) {
+        template<typename Map> std::string format_map(const Map &map) {
             if (map.empty()) return with_color("{}", Color::White);
 
             std::string result = with_color("{", Color::White);
@@ -433,6 +560,7 @@ namespace dbg {
             size_t count = 0;
 
             for (const auto &[key, value] : map) {
+                IndentGuard guard;
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
@@ -441,24 +569,23 @@ namespace dbg {
                 }
 
                 if (!first) result += with_color(",", Color::White);
-                result += "\n" + indent_str(indent + 1);
-                result += format_value(key, indent + 1) +
-                          with_color(" -> ", Color::White) +
-                          format_value(value, indent + 1);
+                result += "\n" + indent_str(IndentGuard::get_current_level());
+                result += format_value(key) + with_color(" -> ", Color::White) +
+                          format_value(value);
                 first = false;
                 ++count;
             }
 
-            result += "\n" + indent_str(indent) + with_color("}", Color::White);
+            result += "\n" + indent_str(IndentGuard::get_current_level()) +
+                      with_color("}", Color::White);
             return result;
         }
 
-        template<typename Map>
-        std::string format_multimap(const Map &map, int indent = 0) {
+        template<typename Map> std::string format_multimap(const Map &map) {
             if (map.empty()) return "{}";
 
             if (!options::show_multiplicity) {
-                return format_map(map, indent);
+                return format_map(map);
             }
 
             std::string result = "{";
@@ -467,6 +594,7 @@ namespace dbg {
 
             auto it = map.begin();
             while (it != map.end()) {
+                IndentGuard guard;
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
@@ -478,8 +606,8 @@ namespace dbg {
                 size_t multiplicity = std::distance(range.first, range.second);
 
                 if (!first) result += ",";
-                result += "\n" + indent_str(indent + 1);
-                result += format_value(it->first, indent + 1);
+                result += "\n" + indent_str(IndentGuard::get_current_level());
+                result += format_value(it->first);
 
                 if (multiplicity > 1) {
                     result += with_color(
@@ -492,8 +620,9 @@ namespace dbg {
                 bool value_first = true;
                 for (auto val_it = range.first; val_it != range.second;
                      ++val_it) {
+                    IndentGuard guard;
                     if (!value_first) result += ", ";
-                    result += format_value(val_it->second, indent + 2);
+                    result += format_value(val_it->second);
                     value_first = false;
                 }
                 result += "]";
@@ -503,12 +632,15 @@ namespace dbg {
                 ++count;
             }
 
-            result += "\n" + indent_str(indent) + "}";
+            result += "\n" + indent_str(IndentGuard::get_current_level()) + "}";
             return result;
         }
 
-        template<typename T>
-        std::string format_value(const T &value, int indent) {
+        template<typename T> std::string format_bitset(const T &bs) {
+            return bs.to_string();
+        }
+
+        template<typename T> std::string format_value(const T &value) {
             using U = remove_cvref_t<T>;
 
             // Built-in types - check char types before integral
@@ -535,14 +667,26 @@ namespace dbg {
             } else if constexpr (std::is_floating_point_v<U>) {
                 return format_float(value);
             }
-            // String types (including C-style strings and string literals) - check before pointers
+            // String types (including C-style strings and string literals) -
+            // check before pointers
             else if constexpr (is_string<U>::value ||
                                std::is_same_v<U, const char *> ||
                                std::is_same_v<U, char *> ||
-                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, char>) ||
-                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, wchar_t>) ||
-                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, char16_t>) ||
-                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, char32_t>)) {
+                               (std::is_array_v<U> &&
+                                std::
+                                    is_same_v<std::remove_extent_t<U>, char>) ||
+                               (std::is_array_v<U> &&
+                                std::is_same_v<
+                                    std::remove_extent_t<U>,
+                                    wchar_t>) ||
+                               (std::is_array_v<U> &&
+                                std::is_same_v<
+                                    std::remove_extent_t<U>,
+                                    char16_t>) ||
+                               (std::is_array_v<U> &&
+                                std::is_same_v<
+                                    std::remove_extent_t<U>,
+                                    char32_t>)) {
                 return format_string(value);
             } else if constexpr (std::is_pointer_v<U>) {
                 return format_pointer(value);
@@ -562,49 +706,53 @@ namespace dbg {
             // Vector-like containers
             else if constexpr (is_vector<U>::value || is_array<U>::value ||
                                is_valarray<U>::value) {
-                return format_array(value, indent);
+                return format_array(value);
             }
             // C-style arrays
             else if constexpr (std::is_array_v<U>) {
-                return format_c_array(value, indent);
+                return format_c_array(value);
             }
             // Deque
             else if constexpr (is_deque<U>::value) {
-                return format_deque(value, indent);
+                return format_deque(value);
             }
             // Queue
             else if constexpr (is_queue<U>::value) {
-                return format_queue(value, indent);
+                return format_queue(value);
             }
             // Stack
             else if constexpr (is_stack<U>::value) {
-                return format_stack(value, indent);
+                return format_stack(value);
             }
             // Priority Queue
             else if constexpr (is_priority_queue<U>::value) {
-                return format_priority_queue(value, indent);
+                return format_priority_queue(value);
             }
             // Sets
             else if constexpr (is_set<U>::value || is_unordered_set<U>::value) {
-                return format_set(value, indent);
+                return format_set(value);
             }
             // Multisets
             else if constexpr (is_multiset<U>::value ||
                                is_unordered_multiset<U>::value) {
-                return format_multiset(value, indent);
+                return format_multiset(value);
             }
             // Maps
             else if constexpr (is_map<U>::value || is_unordered_map<U>::value) {
-                return format_map(value, indent);
+                return format_map(value);
             }
             // Multimaps
             else if constexpr (is_multimap<U>::value ||
                                is_unordered_multimap<U>::value) {
-                return format_multimap(value, indent);
+                return format_multimap(value);
+            }
+            // Bitset
+            else if constexpr (is_bitset<U>::value) {
+                return format_bitset(value);
             }
             // Iterator-based containers (fallback)
             else if constexpr (is_iterator_container<U>::value) {
-                return format_array(value, indent);
+                return format_array(value);
             }
             // Types with operator<<
             else if constexpr (has_ostream_operator<U>::value) {

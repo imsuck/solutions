@@ -3,6 +3,7 @@
 #include "colors.hpp"
 #include "options.hpp"
 #include <array>
+#include <bitset>
 #include <deque>
 #include <list>
 #include <map>
@@ -80,6 +81,9 @@ namespace dbg {
         template<typename T> struct is_array : std::false_type {};
         template<typename T, size_t N>
         struct is_array<std::array<T, N>> : std::true_type {};
+
+        template<typename T> struct is_bitset : std::false_type {};
+        template<size_t N> struct is_bitset<std::bitset<N>> : std::true_type {};
 
         template<typename T> struct is_valarray : std::false_type {};
         template<typename T>
