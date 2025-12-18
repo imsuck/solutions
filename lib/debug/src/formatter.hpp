@@ -230,6 +230,42 @@ namespace dbg {
             return result;
         }
 
+        // Format C-style arrays
+        template<typename T>
+        std::string format_c_array(const T &arr, int indent = 0) {
+            using ElementType = std::remove_extent_t<T>;
+            constexpr size_t N = std::extent_v<T>;
+
+            if (N == 0) return with_color("[]", Color::White);
+
+            std::string result = with_color("[", Color::White);
+            bool first = true;
+            size_t count = 0;
+
+            for (size_t i = 0; i < N; ++i) {
+                if (options::max_container_elements != -1 &&
+                    count >= static_cast<size_t>(options::max_container_elements)) {
+                    result += with_color(", ...", Color::White);
+                    break;
+                }
+
+                if (!first) result += with_color(", ", Color::White);
+                if (!is_trivial_v(arr[i])) {
+                    result += "\n" + indent_str(indent + 1);
+                }
+                result += format_value(arr[i], indent + 1);
+                first = false;
+                ++count;
+            }
+
+            if (!is_trivial_type_v<ElementType>()) {
+                result += "\n" + indent_str(indent);
+            }
+            result += with_color("]", Color::White);
+
+            return result;
+        }
+
         template<typename Container>
         std::string
         format_brace_container(const Container &cont, int indent = 0) {
@@ -499,10 +535,14 @@ namespace dbg {
             } else if constexpr (std::is_floating_point_v<U>) {
                 return format_float(value);
             }
-            // String types (including C-style strings) - check before pointers
+            // String types (including C-style strings and string literals) - check before pointers
             else if constexpr (is_string<U>::value ||
                                std::is_same_v<U, const char *> ||
-                               std::is_same_v<U, char *>) {
+                               std::is_same_v<U, char *> ||
+                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, char>) ||
+                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, wchar_t>) ||
+                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, char16_t>) ||
+                               (std::is_array_v<U> && std::is_same_v<std::remove_extent_t<U>, char32_t>)) {
                 return format_string(value);
             } else if constexpr (std::is_pointer_v<U>) {
                 return format_pointer(value);
@@ -523,6 +563,10 @@ namespace dbg {
             else if constexpr (is_vector<U>::value || is_array<U>::value ||
                                is_valarray<U>::value) {
                 return format_array(value, indent);
+            }
+            // C-style arrays
+            else if constexpr (std::is_array_v<U>) {
+                return format_c_array(value, indent);
             }
             // Deque
             else if constexpr (is_deque<U>::value) {
