@@ -1,49 +1,33 @@
 #pragma once
 
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <string_view>
+#include <vector>
+#include <array>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <unordered_set>
+#include <unordered_map>
+#include <optional>
+#include <tuple>
+#include <valarray>
+#include <iterator>
+#include <algorithm>
+#include <type_traits>
+#include <utility>
+#include <memory>
 
-namespace dbg {
-    using namespace std;
+#include "src/options.hpp"
+#include "src/colors.hpp"
+#include "src/type_traits.hpp"
+#include "src/is_trivial.hpp"
+#include "src/formatter.hpp"
+#include "src/debug_core.hpp"
 
-    inline int indent_lvl = 0;
-    inline string get_indent() { return string(2 * indent_lvl, ' '); }
-} // namespace dbg
-
-#include "info.hpp"
-
-namespace dbg {
-    namespace _detail {
-        struct src_loc {
-            string file_name;
-            int line;
-            string func_name;
-        };
-
-        template<typename...> string fmt() { return ""; }
-        template<typename T, typename... Args>
-        string fmt(T &&x, Args &&...args) {
-            return dbg_info(x) + (sizeof...(args) ? ", " + fmt(args...) : "");
-        }
-    }; // namespace _detail
-
-    template<typename... Args>
-    void dbg_impl(_detail::src_loc loc, string args_str, Args &&...args) {
-        const bool multi_arg = sizeof...(args) > 1;
-        const string label =
-            "[\e[33m" + loc.func_name + "\e[0m:" + to_string(loc.line) + "]";
-
-        string vals = _detail::fmt(args...);
-
-        if (multi_arg) {
-            args_str = "[" + args_str + "]";
-            vals = "[" + vals + "]";
-        }
-
-        const string output = label + " " + args_str + " = " + vals;
-        cerr << output << "\n";
-    }
-} // namespace dbg
-
-#define dbg(a...) dbg::dbg_impl({__FILE__, __LINE__, __func__}, #a, a)
+#define dbg(...) DBG_CHOOSE_MACRO(DBG_COUNT_ARGS(__VA_ARGS__), __VA_ARGS__)
 #define debug()
