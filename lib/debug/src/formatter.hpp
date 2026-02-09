@@ -1,9 +1,5 @@
 #pragma once
 
-#include "colors.hpp"
-#include "is_trivial.hpp"
-#include "options.hpp"
-#include "type_traits.hpp"
 #include <algorithm>
 #include <functional>
 #include <iomanip>
@@ -13,18 +9,34 @@
 #include <string>
 #include <unordered_map>
 
+#include "colors.hpp"
+#include "is_trivial.hpp"
+#include "options.hpp"
+#include "type_traits.hpp"
+
 namespace dbg {
+    class IndentGuard {
+      public:
+        IndentGuard() { ++get_indent_level(); }
+
+        ~IndentGuard() { --get_indent_level(); }
+
+        IndentGuard(const IndentGuard &) = delete;
+        IndentGuard &operator=(const IndentGuard &) = delete;
+
+        static int get_current_level() { return get_indent_level(); }
+
+      private:
+        static int &get_indent_level() {
+            static thread_local int indent_level = 0;
+            return indent_level;
+        }
+    };
+
     namespace detail {
         // Forward declarations
         template<typename T> std::string format_value(const T &value);
         template<typename... Args> std::string format_args(const Args &...args);
-
-        inline std::string with_color(const std::string &value, Color color) {
-            if (!options::enable_colors) {
-                return value;
-            }
-            return to_string(color) + value + to_string(Color::Reset);
-        }
 
         inline std::string indent_str(int level) {
             std::string indent;
@@ -97,21 +109,6 @@ namespace dbg {
             result += to_string(Color::Reset);
             return result;
         }
-
-        // Custom formatter registry
-        namespace detail {
-            using CustomFormatter = std::function<std::string(const void *)>;
-            inline std::unordered_map<size_t, CustomFormatter>
-                custom_formatters;
-
-            template<typename T> std::string format_custom(const T &value) {
-                auto it = custom_formatters.find(typeid(T).hash_code());
-                if (it != custom_formatters.end()) {
-                    return it->second(&value);
-                }
-                return unsupported_type<T>();
-            }
-        } // namespace detail
 
         // Check if type has operator<<
         template<typename T, typename = void>
@@ -274,8 +271,8 @@ namespace dbg {
         std::string format_optional(const std::optional<T> &opt) {
             if (opt.has_value()) {
                 return with_color("Some", Color::Cyan) +
-                       with_color("(", Color::Reset) + format_value(*opt) +
-                       with_color(")", Color::Reset);
+                       with_color("(", Color::BrightBlack) +
+                       format_value(*opt) + with_color(")", Color::BrightBlack);
             }
             return with_color("None", Color::Red);
         }
@@ -304,11 +301,11 @@ namespace dbg {
             const std::tuple<Ts...> &tup,
             std::index_sequence<Is...>
         ) {
-            std::string result = with_color("(", Color::White);
-            ((result += (Is == 0 ? "" : with_color(", ", Color::White)) +
+            std::string result = with_color("(", Color::BrightBlack);
+            ((result += (Is == 0 ? "" : with_color(", ", Color::BrightBlack)) +
                         format_value(std::get<Is>(tup))),
              ...);
-            result += with_color(")", Color::White);
+            result += with_color(")", Color::BrightBlack);
             return result;
         }
 
@@ -320,11 +317,23 @@ namespace dbg {
             );
         }
 
+        template<typename T1, typename T2>
+        std::string format_pair(const std::pair<T1, T2> &p) {
+            std::string result = with_color("(", Color::BrightBlack);
+            result += format_value(p.first);
+            result += with_color(", ", Color::BrightBlack);
+            result += format_value(p.second);
+            result += with_color(")", Color::BrightBlack);
+            return result;
+        }
+
         template<typename Container>
         std::string format_array(const Container &cont) {
-            if (cont.empty()) return with_color("[]", Color::White);
+            using std::begin;
+            using std::end;
+            auto it = begin(cont);
 
-            std::string result = with_color("[", Color::White);
+            std::string result = with_color("[", Color::BrightBlack);
             bool first = true;
             size_t count = 0;
 
@@ -333,11 +342,11 @@ namespace dbg {
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
-                    result += with_color(", ...", Color::White);
+                    result += with_color(", ...", Color::BrightBlack);
                     break;
                 }
 
-                if (!first) result += with_color(", ", Color::White);
+                if (!first) result += with_color(", ", Color::BrightBlack);
                 if (!is_trivial_v(item)) {
                     result +=
                         "\n" + indent_str(IndentGuard::get_current_level());
@@ -347,10 +356,10 @@ namespace dbg {
                 ++count;
             }
 
-            if (!is_trivial_type_v<typename Container::value_type>()) {
+            if (!is_trivial_type_v<remove_cvref_t<decltype(*it)>>()) {
                 result += "\n" + indent_str(IndentGuard::get_current_level());
             }
-            result += with_color("]", Color::White);
+            result += with_color("]", Color::BrightBlack);
 
             return result;
         }
@@ -360,9 +369,7 @@ namespace dbg {
             using ElementType = std::remove_extent_t<T>;
             constexpr size_t N = std::extent_v<T>;
 
-            if (N == 0) return with_color("[]", Color::White);
-
-            std::string result = with_color("[", Color::White);
+            std::string result = with_color("[", Color::BrightBlack);
             bool first = true;
             size_t count = 0;
 
@@ -371,11 +378,11 @@ namespace dbg {
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
-                    result += with_color(", ...", Color::White);
+                    result += with_color(", ...", Color::BrightBlack);
                     break;
                 }
 
-                if (!first) result += with_color(", ", Color::White);
+                if (!first) result += with_color(", ", Color::BrightBlack);
                 if (!is_trivial_v(arr[i])) {
                     result +=
                         "\n" + indent_str(IndentGuard::get_current_level());
@@ -388,16 +395,14 @@ namespace dbg {
             if (!is_trivial_type_v<ElementType>()) {
                 result += "\n" + indent_str(IndentGuard::get_current_level());
             }
-            result += with_color("]", Color::White);
+            result += with_color("]", Color::BrightBlack);
 
             return result;
         }
 
         template<typename Container>
         std::string format_brace_container(const Container &cont) {
-            if (cont.empty()) return with_color("{}", Color::White);
-
-            std::string result = with_color("{", Color::White);
+            std::string result = with_color("{", Color::BrightBlack);
             bool first = true;
             size_t count = 0;
 
@@ -406,11 +411,11 @@ namespace dbg {
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
-                    result += with_color(", ...", Color::White);
+                    result += with_color(", ...", Color::BrightBlack);
                     break;
                 }
 
-                if (!first) result += with_color(", ", Color::White);
+                if (!first) result += with_color(", ", Color::BrightBlack);
                 if (!is_trivial_v(item)) {
                     result +=
                         "\n" + indent_str(IndentGuard::get_current_level());
@@ -423,7 +428,7 @@ namespace dbg {
             if (!is_trivial_type_v<typename Container::value_type>()) {
                 result += "\n" + indent_str(IndentGuard::get_current_level());
             }
-            result += with_color("}", Color::White);
+            result += with_color("}", Color::BrightBlack);
 
             return result;
         }
@@ -437,19 +442,17 @@ namespace dbg {
         // Format queue (front to back)
         template<typename T, typename A>
         std::string format_queue(const std::queue<T, A> &cont) {
-            if (cont.empty()) return "{}";
-
-            std::string result = "{";
+            std::string result = with_color("{", Color::BrightBlack);
             std::queue<T, A> temp = cont;
 
             bool first = true;
             while (!temp.empty()) {
-                if (!first) result += ", ";
+                if (!first) result += with_color(", ", Color::BrightBlack);
                 result += format_value(temp.front());
                 temp.pop();
                 first = false;
             }
-            result += "}";
+            result += with_color("}", Color::BrightBlack);
 
             return result;
         }
@@ -457,19 +460,17 @@ namespace dbg {
         // Format stack/priority_queue (top to bottom)
         template<typename T, typename A>
         std::string format_stack(const std::stack<T, A> &cont) {
-            if (cont.empty()) return "{}";
-
-            std::string result = "{";
+            std::string result = with_color("{", Color::BrightBlack);
             std::stack<T, A> temp = cont;
 
             bool first = true;
             while (!temp.empty()) {
-                if (!first) result += ", ";
+                if (!first) result += with_color(", ", Color::BrightBlack);
                 result += format_value(temp.top());
                 temp.pop();
                 first = false;
             }
-            result += "}";
+            result += with_color("}", Color::BrightBlack);
 
             return result;
         }
@@ -478,19 +479,17 @@ namespace dbg {
         template<typename T, typename C, typename A>
         std::string
         format_priority_queue(const std::priority_queue<T, C, A> &cont) {
-            if (cont.empty()) return "{}";
-
-            std::string result = "{";
+            std::string result = with_color("{", Color::BrightBlack);
             std::priority_queue<T, C, A> temp = cont;
 
             bool first = true;
             while (!temp.empty()) {
-                if (!first) result += ", ";
+                if (!first) result += with_color(", ", Color::BrightBlack);
                 result += format_value(temp.top());
                 temp.pop();
                 first = false;
             }
-            result += "}";
+            result += with_color("}", Color::BrightBlack);
 
             return result;
         }
@@ -502,13 +501,11 @@ namespace dbg {
 
         template<typename Container>
         std::string format_multiset(const Container &cont) {
-            if (cont.empty()) return "{}";
-
             if (!options::show_multiplicity) {
                 return format_brace_container(cont);
             }
 
-            std::string result = "{";
+            std::string result = with_color("{", Color::BrightBlack);
             bool first = true;
             size_t count = 0;
 
@@ -518,14 +515,14 @@ namespace dbg {
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
-                    result += ", ...";
+                    result += with_color(", ...", Color::BrightBlack);
                     break;
                 }
 
                 auto range = cont.equal_range(*it);
                 size_t multiplicity = std::distance(range.first, range.second);
 
-                if (!first) result += ", ";
+                if (!first) result += with_color(", ", Color::BrightBlack);
                 if (!is_trivial_v(*it)) {
                     result +=
                         "\n" + indent_str(IndentGuard::get_current_level());
@@ -547,15 +544,13 @@ namespace dbg {
             if (!is_trivial_type_v<typename Container::value_type>()) {
                 result += "\n" + indent_str(IndentGuard::get_current_level());
             }
-            result += "}";
+            result += with_color("}", Color::BrightBlack);
 
             return result;
         }
 
         template<typename Map> std::string format_map(const Map &map) {
-            if (map.empty()) return with_color("{}", Color::White);
-
-            std::string result = with_color("{", Color::White);
+            std::string result = with_color("{", Color::BrightBlack);
             bool first = true;
             size_t count = 0;
 
@@ -564,31 +559,30 @@ namespace dbg {
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
-                    result += with_color(", ...", Color::White);
+                    result += with_color(", ...", Color::BrightBlack);
                     break;
                 }
 
-                if (!first) result += with_color(",", Color::White);
+                if (!first) result += with_color(",", Color::BrightBlack);
                 result += "\n" + indent_str(IndentGuard::get_current_level());
-                result += format_value(key) + with_color(" -> ", Color::White) +
+                result += format_value(key) +
+                          with_color(" -> ", Color::BrightBlack) +
                           format_value(value);
                 first = false;
                 ++count;
             }
 
             result += "\n" + indent_str(IndentGuard::get_current_level()) +
-                      with_color("}", Color::White);
+                      with_color("}", Color::BrightBlack);
             return result;
         }
 
         template<typename Map> std::string format_multimap(const Map &map) {
-            if (map.empty()) return "{}";
-
             if (!options::show_multiplicity) {
                 return format_map(map);
             }
 
-            std::string result = "{";
+            std::string result = with_color("{", Color::BrightBlack);
             bool first = true;
             size_t count = 0;
 
@@ -598,14 +592,14 @@ namespace dbg {
                 if (options::max_container_elements != -1 &&
                     count >=
                         static_cast<size_t>(options::max_container_elements)) {
-                    result += ", ...";
+                    result += with_color(", ...", Color::BrightBlack);
                     break;
                 }
 
                 auto range = map.equal_range(it->first);
                 size_t multiplicity = std::distance(range.first, range.second);
 
-                if (!first) result += ",";
+                if (!first) result += with_color(",", Color::BrightBlack);
                 result += "\n" + indent_str(IndentGuard::get_current_level());
                 result += format_value(it->first);
 
@@ -616,23 +610,34 @@ namespace dbg {
                     );
                 }
 
-                result += " -> [";
-                bool value_first = true;
+                result += with_color(" -> ", Color::BrightBlack);
+                std::vector<decltype(*it->second)> values;
+                values.reserve(multiplicity);
                 for (auto val_it = range.first; val_it != range.second;
                      ++val_it) {
-                    IndentGuard guard;
-                    if (!value_first) result += ", ";
-                    result += format_value(val_it->second);
-                    value_first = false;
+                    values.push_back(val_it->second);
                 }
-                result += "]";
+                result += format_value(values);
+
+                // result += with_color(" -> [", Color::BrightBlack);
+                // bool value_first = true;
+                // for (auto val_it = range.first; val_it != range.second;
+                //      ++val_it) {
+                //     IndentGuard guard2;
+                //     if (!value_first)
+                //         result += with_color(", ", Color::BrightBlack);
+                //     result += format_value(val_it->second);
+                //     value_first = false;
+                // }
+                // result += with_color("]", Color::BrightBlack);
 
                 first = false;
                 it = range.second;
                 ++count;
             }
 
-            result += "\n" + indent_str(IndentGuard::get_current_level()) + "}";
+            result += "\n" + indent_str(IndentGuard::get_current_level()) +
+                      with_color("}", Color::BrightBlack);
             return result;
         }
 
@@ -699,6 +704,10 @@ namespace dbg {
             else if constexpr (is_optional<U>::value) {
                 return format_optional(value);
             }
+            // Pair
+            else if constexpr (is_pair<U>::value) {
+                return format_pair(value);
+            }
             // Tuple
             else if constexpr (is_tuple<U>::value) {
                 return format_tuple(value);
@@ -758,7 +767,7 @@ namespace dbg {
             else if constexpr (has_ostream_operator<U>::value) {
                 return format_with_ostream(value);
             } else {
-                return detail::format_custom(value);
+                return unsupported_type<T>();
             }
         }
     } // namespace detail

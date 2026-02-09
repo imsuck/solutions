@@ -1,11 +1,11 @@
 #pragma once
 
-#include "colors.hpp"
-#include "formatter.hpp"
-#include "options.hpp"
 #include <iostream>
 #include <string>
 #include <utility>
+
+#include "colors.hpp"
+#include "formatter.hpp"
 
 // Helper macro to get function name
 #define DBG_FUNCTION_NAME __func__
@@ -22,7 +22,7 @@ namespace dbg {
         template<typename T>
         std::string format_arg(const char *name, const T &value) {
             std::string result = with_color(name, Color::Blue);
-            result += " = ";
+            result += with_color(" = ", Color::BrightBlack);
             result += format_value(value);
             return result;
         }
@@ -33,16 +33,16 @@ namespace dbg {
             const std::array<const char *, sizeof...(Args)> &names,
             std::index_sequence<Is...>
         ) {
-            std::string arg_str = "[";
-            ((arg_str +=
-              (Is == 0 ? "" : ", ") + with_color(names[Is], Color::Blue)),
+            std::string arg_str = with_color("[", Color::BrightBlack);
+            ((arg_str += (Is == 0 ? "" : with_color(", ", Color::BrightBlack)) +
+                         with_color(names[Is], Color::Blue)),
              ...);
-            arg_str += "] = [";
+            arg_str += with_color("] = [", Color::BrightBlack);
 
-            ((arg_str +=
-              (Is == 0 ? "" : ", ") + format_value(std::get<Is>(args_tuple))),
+            ((arg_str += (Is == 0 ? "" : with_color(", ", Color::BrightBlack)) +
+                         format_value(std::get<Is>(args_tuple))),
              ...);
-            arg_str += "]";
+            arg_str += with_color("]", Color::BrightBlack);
 
             return arg_str;
         }
@@ -52,21 +52,23 @@ namespace dbg {
             const std::array<const char *, sizeof...(Args)> &names,
             const Args &...args
         ) {
-            std::string result = "[";
+            std::string result = with_color("[", Color::BrightBlack);
             bool first = true;
 
             IndentGuard guard;
 
             // Format each argument on a new line since we have non-trivial args
             size_t idx = 0;
-            ((result += (first ? "\n" + indent_str(1) : ",\n" + indent_str(1)) +
-                        with_color(names[idx], Color::Blue) + " = " +
-                        format_value(args),
+            ((result +=
+              (first ? "\n" + indent_str(1)
+                     : with_color(",\n", Color::BrightBlack) + indent_str(1)) +
+              with_color(names[idx], Color::Blue) +
+              with_color(" = ", Color::BrightBlack) + format_value(args),
               first = false,
               ++idx),
              ...);
 
-            result += "\n]";
+            result += "\n" + with_color("]", Color::BrightBlack);
             return result;
         }
 
@@ -93,10 +95,12 @@ namespace dbg {
             int line,
             const std::string &content
         ) {
-            std::cerr << "["
-                      << (options::enable_colors ? Color::Yellow : Color::Reset)
-                      << func_name << Color::Reset << ":" << line << "] "
-                      << content << std::endl;
+            std::cerr << with_color("[", Color::BrightBlack)
+                      << with_color(func_name, Color::Yellow)
+
+                      << with_color(":", Color::BrightBlack) << line
+                      << with_color("] ", Color::BrightBlack) << content
+                      << std::endl;
         }
 
     } // namespace detail
@@ -406,57 +410,97 @@ namespace dbg {
 // Macros for custom struct formatting (up to 10 fields)
 #define DBG_FORMAT_STRUCT1(Type, field1, ...)                                  \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << obj.field1 << " }";                                \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT2(Type, field1, field2, ...)                          \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT3(Type, field1, field2, field3, ...)                  \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT4(Type, field1, field2, field3, field4, ...)          \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << ", "    \
-                  << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field4) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT5(Type, field1, field2, field3, field4, field5, ...)  \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << ", "    \
-                  << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field4) << ", "    \
-                  << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field5) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field5)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT6(                                                    \
@@ -470,19 +514,33 @@ namespace dbg {
     ...                                                                        \
 )                                                                              \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << ", "    \
-                  << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field4) << ", "    \
-                  << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field5) << ", "    \
-                  << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field6) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field5)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field6)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT7(                                                    \
@@ -497,21 +555,37 @@ namespace dbg {
     ...                                                                        \
 )                                                                              \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << ", "    \
-                  << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field4) << ", "    \
-                  << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field5) << ", "    \
-                  << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field6) << ", "    \
-                  << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field7) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field5)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field6)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field7)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT8(                                                    \
@@ -527,23 +601,41 @@ namespace dbg {
     ...                                                                        \
 )                                                                              \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << ", "    \
-                  << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field4) << ", "    \
-                  << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field5) << ", "    \
-                  << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field6) << ", "    \
-                  << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field7) << ", "    \
-                  << ::dbg::detail::with_color(#field8, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field8) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field5)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field6)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field7)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field8, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field8)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT9(                                                    \
@@ -560,25 +652,45 @@ namespace dbg {
     ...                                                                        \
 )                                                                              \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << ", "    \
-                  << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field4) << ", "    \
-                  << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field5) << ", "    \
-                  << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field6) << ", "    \
-                  << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field7) << ", "    \
-                  << ::dbg::detail::with_color(#field8, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field8) << ", "    \
-                  << ::dbg::detail::with_color(#field9, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field9) << " }";   \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field5)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field6)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field7)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field8, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field8)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field9, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field9)                      \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 #define DBG_FORMAT_STRUCT10(                                                   \
@@ -596,27 +708,49 @@ namespace dbg {
     ...                                                                        \
 )                                                                              \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        return os << #Type << " { "                                            \
-                  << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field1) << ", "    \
-                  << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field2) << ", "    \
-                  << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field3) << ", "    \
-                  << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field4) << ", "    \
-                  << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field5) << ", "    \
-                  << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field6) << ", "    \
-                  << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field7) << ", "    \
-                  << ::dbg::detail::with_color(#field8, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field8) << ", "    \
-                  << ::dbg::detail::with_color(#field9, ::dbg::Color::Cyan)    \
-                  << "=" << ::dbg::detail::format_value(obj.field9) << ", "    \
-                  << ::dbg::detail::with_color(#field10, ::dbg::Color::Cyan)   \
-                  << "=" << ::dbg::detail::format_value(obj.field10) << " }";  \
+        return os                                                              \
+               << #Type                                                        \
+               << ::dbg::detail::with_color(" { ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field5)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field6, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field6)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field7, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field7)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field8, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field8)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field9, ::dbg::Color::Cyan)       \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field9)                      \
+               << ::dbg::detail::with_color(", ", ::dbg::Color::BrightBlack)   \
+               << ::dbg::detail::with_color(#field10, ::dbg::Color::Cyan)      \
+               << ::dbg::detail::with_color("=", ::dbg::Color::BrightBlack)    \
+               << ::dbg::detail::format_value(obj.field10)                     \
+               << ::dbg::detail::with_color(" }", ::dbg::Color::BrightBlack);  \
     }
 
 // Automatic dispatch macro using buffer arguments
@@ -670,335 +804,434 @@ namespace dbg {
 // Pretty print struct formatting (multiline)
 #define DBG_PRETTY_STRUCT1(Type, field1, ...)                                  \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field1) << "\n";    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field1) << "\n";             \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT2(Type, field1, field2, ...)                          \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field1) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field2) << "\n";    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field2) << "\n";             \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT3(Type, field1, field2, field3, ...)                  \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field1) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field2) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field3) << "\n";    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field3) << "\n";             \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT4(Type, field1, field2, field3, field4, ...)          \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field1) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field2) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field3) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field4) << "\n";    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field4) << "\n";             \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT5(Type, field1, field2, field3, field4, field5, ...)  \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field1, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field1) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field1)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field2, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field2) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field2)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field3, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field3) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field3)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field4, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field4) << ",\n"    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field4)                      \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
                << ::dbg::detail::with_color(#field5, ::dbg::Color::Cyan)       \
-               << " = " << ::dbg::detail::format_value(obj.field5) << "\n";    \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.field5) << "\n";             \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT6(Type, f1, f2, f3, f4, f5, f6, ...)                  \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f1) << ",\n"                 \
+               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f1)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f2) << ",\n"                 \
+               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f2)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f3) << ",\n"                 \
+               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f3)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f4) << ",\n"                 \
+               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f4)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f5) << ",\n"                 \
+               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f5)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan) << " = "  \
+               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::format_value(obj.f6) << "\n";                 \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT7(Type, f1, f2, f3, f4, f5, f6, f7, ...)              \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f1) << ",\n"                 \
+               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f1)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f2) << ",\n"                 \
+               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f2)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f3) << ",\n"                 \
+               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f3)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f4) << ",\n"                 \
+               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f4)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f5) << ",\n"                 \
+               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f5)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f6) << ",\n"                 \
+               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f6)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan) << " = "  \
+               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::format_value(obj.f7) << "\n";                 \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT8(Type, f1, f2, f3, f4, f5, f6, f7, f8, ...)          \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f1) << ",\n"                 \
+               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f1)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f2) << ",\n"                 \
+               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f2)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f3) << ",\n"                 \
+               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f3)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f4) << ",\n"                 \
+               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f4)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f5) << ",\n"                 \
+               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f5)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f6) << ",\n"                 \
+               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f6)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f7) << ",\n"                 \
+               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f7)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f8, ::dbg::Color::Cyan) << " = "  \
+               << ::dbg::detail::with_color(#f8, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::format_value(obj.f8) << "\n";                 \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT9(Type, f1, f2, f3, f4, f5, f6, f7, f8, f9, ...)      \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f1) << ",\n"                 \
+               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f1)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f2) << ",\n"                 \
+               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f2)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f3) << ",\n"                 \
+               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f3)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f4) << ",\n"                 \
+               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f4)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f5) << ",\n"                 \
+               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f5)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f6) << ",\n"                 \
+               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f6)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f7) << ",\n"                 \
+               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f7)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f8, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f8) << ",\n"                 \
+               << ::dbg::detail::with_color(#f8, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f8)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f9, ::dbg::Color::Cyan) << " = "  \
+               << ::dbg::detail::with_color(#f9, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::format_value(obj.f9) << "\n";                 \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT10(                                                   \
@@ -1016,64 +1249,85 @@ namespace dbg {
     ...                                                                        \
 )                                                                              \
     inline std::ostream &operator<<(std::ostream &os, const Type &obj) {       \
-        os << #Type << " {\n";                                                 \
+        os << #Type                                                            \
+           << ::dbg::detail::with_color(" {\n", ::dbg::Color::BrightBlack);    \
         {                                                                      \
             ::dbg::IndentGuard guard;                                          \
             os << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f1) << ",\n"                 \
+               << ::dbg::detail::with_color(#f1, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f1)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f2) << ",\n"                 \
+               << ::dbg::detail::with_color(#f2, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f2)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f3) << ",\n"                 \
+               << ::dbg::detail::with_color(#f3, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f3)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f4) << ",\n"                 \
+               << ::dbg::detail::with_color(#f4, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f4)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f5) << ",\n"                 \
+               << ::dbg::detail::with_color(#f5, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f5)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f6) << ",\n"                 \
+               << ::dbg::detail::with_color(#f6, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f6)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f7) << ",\n"                 \
+               << ::dbg::detail::with_color(#f7, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f7)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f8, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f8) << ",\n"                 \
+               << ::dbg::detail::with_color(#f8, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f8)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f9, ::dbg::Color::Cyan) << " = "  \
-               << ::dbg::detail::format_value(obj.f9) << ",\n"                 \
+               << ::dbg::detail::with_color(#f9, ::dbg::Color::Cyan)           \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
+               << ::dbg::detail::format_value(obj.f9)                          \
+               << ::dbg::detail::with_color(",\n", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::indent_str(                                   \
                       ::dbg::IndentGuard::get_current_level()                  \
                   )                                                            \
-               << ::dbg::detail::with_color(#f10, ::dbg::Color::Cyan) << " = " \
+               << ::dbg::detail::with_color(#f10, ::dbg::Color::Cyan)          \
+               << ::dbg::detail::with_color(" = ", ::dbg::Color::BrightBlack)  \
                << ::dbg::detail::format_value(obj.f10) << "\n";                \
         }                                                                      \
-        return os << ::dbg::detail::indent_str(                                \
-                         ::dbg::IndentGuard::get_current_level()               \
-                     )                                                         \
-                  << "}";                                                      \
+        return os                                                              \
+               << ::dbg::detail::indent_str(                                   \
+                      ::dbg::IndentGuard::get_current_level()                  \
+                  )                                                            \
+               << ::dbg::detail::with_color("}", ::dbg::Color::BrightBlack);   \
     }
 
 #define DBG_PRETTY_STRUCT(Type, ...)                                           \

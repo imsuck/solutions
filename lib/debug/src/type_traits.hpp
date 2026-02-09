@@ -1,10 +1,9 @@
 #pragma once
 
-#include "colors.hpp"
-#include "options.hpp"
 #include <array>
 #include <bitset>
 #include <deque>
+#include <iterator>
 #include <list>
 #include <map>
 #include <memory>
@@ -16,11 +15,14 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
-#include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <valarray>
 #include <vector>
+
+#include "colors.hpp"
+#include "options.hpp"
 
 namespace dbg {
     namespace detail {
@@ -69,6 +71,10 @@ namespace dbg {
         template<typename T> struct is_optional : std::false_type {};
         template<typename T>
         struct is_optional<std::optional<T>> : std::true_type {};
+
+        template<typename T> struct is_pair : std::false_type {};
+        template<typename T1, typename T2>
+        struct is_pair<std::pair<T1, T2>> : std::true_type {};
 
         template<typename T> struct is_tuple : std::false_type {};
         template<typename... Ts>
@@ -143,13 +149,20 @@ namespace dbg {
         struct is_unordered_multimap<std::unordered_multimap<K, V, H, E, A>>
             : std::true_type {};
 
-        template<typename T> struct is_iterator_container : std::false_type {};
+        namespace detail_adl {
+            using std::begin;
+
+            template<typename T, typename = void>
+            struct has_begin : std::false_type {};
+            template<typename T>
+            struct has_begin<
+                T,
+                std::void_t<decltype(begin(std::declval<T &>()))>>
+                : std::true_type {};
+        } // namespace detail_adl
+
         template<typename T>
-        struct is_iterator_container<std::vector<T>> : std::true_type {};
-        template<typename T>
-        struct is_iterator_container<std::deque<T>> : std::true_type {};
-        template<typename T>
-        struct is_iterator_container<std::list<T>> : std::true_type {};
+        struct is_iterator_container : detail_adl::has_begin<T> {};
 
         template<typename T> struct is_smart_pointer : std::false_type {};
         template<typename T>
