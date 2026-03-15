@@ -4,8 +4,12 @@
 
 #!/usr/bin/env sh
 
-killall -q watchexec
-while pgrep -u $UID -x watchexec >/dev/null; do sleep 1; done
+
+pgrep -u "$UID" -f 'watchexec --no-vcs-ignore -i="stress_test.*/\*" -pe cpp' | xargs -r kill
+pgrep -u "$UID" -f 'watchexec --no-vcs-ignore -i="stress_test.*/\*" -pe inp' | xargs -r kill
+while pgrep -u "$UID" -f 'watchexec --no-vcs-ignore -i="stress_test.*/\*" -pe' >/dev/null; do
+    sleep 1
+done
 
 export DIR="$(dirname "$0")"
 
